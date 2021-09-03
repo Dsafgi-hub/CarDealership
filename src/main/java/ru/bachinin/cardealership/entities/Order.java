@@ -1,8 +1,20 @@
 package ru.bachinin.cardealership.entities;
 
-import javax.persistence.*;
+import ru.bachinin.cardealership.enums.OrderState;
+
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
+import javax.persistence.SequenceGenerator;
+import javax.persistence.Table;
 import java.io.Serializable;
-import java.util.Date;
+import java.time.LocalDate;
 
 @Entity
 @Table(name = "orders")
@@ -13,20 +25,19 @@ public class Order implements Serializable {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "orders_sequence")
     private Long id;
 
-    @Temporal(TemporalType.DATE)
     @Column(name = "created_at", nullable = false)
-    private Date createdAt;
+    private LocalDate createdAt;
 
     @Column(name = "state", nullable = false)
     private OrderState orderState;
 
     @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "vehicle_id", referencedColumnName = "id")
+    @JoinColumn(name = "id_vehicle", referencedColumnName = "id")
     private Vehicle vehicle;
 
     @ManyToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "created_by", referencedColumnName = "id")
-    private UserInfo createdBy;
+    @JoinColumn(name = "id_user", referencedColumnName = "id")
+    private User createdBy;
 
     public Long getId() {
         return id;
@@ -36,11 +47,11 @@ public class Order implements Serializable {
         this.id = id;
     }
 
-    public Date getCreatedAt() {
+    public LocalDate getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(Date createdAt) {
+    public void setCreatedAt(LocalDate createdAt) {
         this.createdAt = createdAt;
     }
 
@@ -60,11 +71,12 @@ public class Order implements Serializable {
         this.vehicle = vehicle;
     }
 
-    public UserInfo getCreatedBy() {
+    public User getCreatedBy() {
         return createdBy;
     }
 
-    public void setCreatedBy(UserInfo createdBy) {
+    public void setCreatedBy(User createdBy) {
         this.createdBy = createdBy;
     }
+
 }

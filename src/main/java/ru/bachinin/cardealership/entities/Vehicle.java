@@ -1,9 +1,22 @@
 package ru.bachinin.cardealership.entities;
 
-import javax.persistence.*;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
+import javax.persistence.SequenceGenerator;
+import javax.persistence.Table;
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.util.Date;
+import java.time.LocalDate;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -15,15 +28,14 @@ public class Vehicle implements Serializable {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "vehicleSequence")
     private Long id;
 
-    @Column(name = "VIN")
+    @Column(name = "VIN", unique = true)
     private String VIN;
 
     @Column(name = "colour", nullable = false)
     private String colour;
 
-    @Temporal(TemporalType.DATE)
     @Column(name = "created_at")
-    private Date createdAt;
+    private LocalDate createdAt;
 
     @Column(name = "vehicle_cost")
     private BigDecimal vehicleCost;
@@ -34,12 +46,19 @@ public class Vehicle implements Serializable {
     @Column(name = "engine_volume")
     private Double engineVolume;
 
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "vehicle_id", referencedColumnName = "id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_vehicle_model", referencedColumnName = "id")
     private VehicleModel vehicleModel;
 
-    @OneToMany(fetch = FetchType.LAZY)
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "vehicle")
     private Set<Equipment> equipments;
+
+    @OneToOne(mappedBy = "vehicle")
+    private Order order;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_invoice", referencedColumnName = "id")
+    private Invoice invoice;
 
     public Long getId() {
         return id;
@@ -65,11 +84,11 @@ public class Vehicle implements Serializable {
         this.colour = colour;
     }
 
-    public Date getCreatedAt() {
+    public LocalDate getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(Date createdAt) {
+    public void setCreatedAt(LocalDate createdAt) {
         this.createdAt = createdAt;
     }
 
@@ -112,4 +131,21 @@ public class Vehicle implements Serializable {
     public void setEquipments(Set<Equipment> equipments) {
         this.equipments = equipments;
     }
+
+    public Order getOrder() {
+        return order;
+    }
+
+    public void setOrder(Order order) {
+        this.order = order;
+    }
+
+    public Invoice getInvoice() {
+        return invoice;
+    }
+
+    public void setInvoice(Invoice invoice) {
+        this.invoice = invoice;
+    }
+
 }

@@ -1,7 +1,16 @@
 package ru.bachinin.cardealership.entities;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.OneToMany;
+import javax.persistence.SequenceGenerator;
+import javax.persistence.Table;
 import java.io.Serializable;
+import java.util.List;
 
 @Entity
 @Table(name = "type_of_equipment")
@@ -15,6 +24,30 @@ public class TypeOfEquipment implements Serializable {
     @Column(name = "name", nullable = false, unique = true)
     private String name;
 
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "typeOfEquipment")
+    private List<Equipment> equipmentList;
 
+    public int getId() {
+        return id;
+    }
 
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public List<Equipment> getEquipmentList() {
+        return equipmentList;
+    }
+
+    public void setEquipmentList(List<Equipment> equipmentList) {
+        this.equipmentList = equipmentList;
+    }
 }

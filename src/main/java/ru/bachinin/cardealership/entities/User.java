@@ -1,15 +1,27 @@
 package ru.bachinin.cardealership.entities;
 
-import javax.persistence.*;
+import ru.bachinin.cardealership.enums.UserRole;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.OneToMany;
+import javax.persistence.SequenceGenerator;
+import javax.persistence.Table;
 import java.io.Serializable;
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.Set;
 
 @Entity
 @Table(name = "users")
-public class UserInfo implements Serializable {
+public class User implements Serializable {
     @Id
-    @Column (name = "id", nullable = false)
+    @Column(name = "id", nullable = false)
     @SequenceGenerator(name = "userInfoSequence", sequenceName = "USERS_SEQUENCE", allocationSize = 1)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "userInfoSequence")
     private long id;
@@ -29,16 +41,18 @@ public class UserInfo implements Serializable {
     @Column(name = "second_name")
     private String secondName;
 
-    @Temporal(TemporalType.DATE)
     @Column(name = "created_at", nullable = false)
-    private Date createdAt;
+    private LocalDate createdAt;
 
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "role_id", referencedColumnName = "id")
+    @Enumerated(EnumType.STRING)
+    @Column(name = "user_role", nullable = false)
     private UserRole userRole;
 
-    @OneToMany(fetch = FetchType.LAZY)
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "createdBy")
     private Set<Order> orders;
+
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "createdBy")
+    private Set<Invoice> invoices;
 
     public long getId() {
         return id;
@@ -96,11 +110,11 @@ public class UserInfo implements Serializable {
         this.userRole = userRole;
     }
 
-    public Date getCreatedAt() {
+    public LocalDate getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(Date createdAt) {
+    public void setCreatedAt(LocalDate createdAt) {
         this.createdAt = createdAt;
     }
 
@@ -111,4 +125,13 @@ public class UserInfo implements Serializable {
     public void setOrders(Set<Order> orders) {
         this.orders = orders;
     }
+
+    public Set<Invoice> getInvoices() {
+        return invoices;
+    }
+
+    public void setInvoices(Set<Invoice> invoices) {
+        this.invoices = invoices;
+    }
+
 }
