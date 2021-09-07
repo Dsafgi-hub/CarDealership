@@ -1,6 +1,8 @@
 package ru.bachinin.cardealership.entities;
 
-import javax.persistence.CascadeType;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -16,7 +18,6 @@ import javax.persistence.Table;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -34,8 +35,11 @@ public class Vehicle implements Serializable {
     @Column(name = "colour", nullable = false)
     private String colour;
 
-    @Column(name = "created_at")
+    @Column(name = "created_at", nullable = false)
     private LocalDate createdAt;
+
+    @Column(name = "updated_at")
+    private LocalDate updatedAt;
 
     @Column(name = "vehicle_cost")
     private BigDecimal vehicleCost;
@@ -46,17 +50,22 @@ public class Vehicle implements Serializable {
     @Column(name = "engine_volume")
     private Double engineVolume;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_vehicle_model", referencedColumnName = "id")
+    @Column(name = "is_available")
+    private Boolean isAvailable;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "id_vehicle_model", referencedColumnName = "id", nullable = false)
     private VehicleModel vehicleModel;
 
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "vehicle")
+    @JsonIgnore
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "vehicle")
     private Set<Equipment> equipments;
 
-    @OneToOne(mappedBy = "vehicle")
+    @JsonIgnore
+    @OneToOne(fetch = FetchType.EAGER, mappedBy = "vehicle")
     private Order order;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "id_invoice", referencedColumnName = "id")
     private Invoice invoice;
 
@@ -92,6 +101,14 @@ public class Vehicle implements Serializable {
         this.createdAt = createdAt;
     }
 
+    public LocalDate getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(LocalDate updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+
     public BigDecimal getVehicleCost() {
         return vehicleCost;
     }
@@ -114,6 +131,14 @@ public class Vehicle implements Serializable {
 
     public void setEngineVolume(Double engineVolume) {
         this.engineVolume = engineVolume;
+    }
+
+    public Boolean getAvailable() {
+        return isAvailable;
+    }
+
+    public void setAvailable(Boolean available) {
+        isAvailable = available;
     }
 
     public VehicleModel getVehicleModel() {

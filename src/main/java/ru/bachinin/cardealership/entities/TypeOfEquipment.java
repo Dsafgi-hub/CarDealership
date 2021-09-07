@@ -1,5 +1,7 @@
 package ru.bachinin.cardealership.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -19,19 +21,20 @@ public class TypeOfEquipment implements Serializable {
     @Column(name = "id")
     @SequenceGenerator(name = "typeOfEquipmentSequence", sequenceName = "TYPE_OF_EQUIPMENT_SEQUENCE", allocationSize = 1)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "typeOfEquipmentSequence")
-    private int id;
+    private Long id;
 
     @Column(name = "name", nullable = false, unique = true)
     private String name;
 
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "typeOfEquipment")
+    @JsonIgnore
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "typeOfEquipment")
     private List<Equipment> equipmentList;
 
-    public int getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Long id) {
         this.id = id;
     }
 

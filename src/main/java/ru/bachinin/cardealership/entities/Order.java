@@ -28,6 +28,9 @@ public class Order implements Serializable {
     @Column(name = "created_at", nullable = false)
     private LocalDate createdAt;
 
+    @Column(name = "updated_at")
+    private LocalDate updatedAt;
+
     @Column(name = "state", nullable = false)
     private OrderState orderState;
 
@@ -53,6 +56,14 @@ public class Order implements Serializable {
 
     public void setCreatedAt(LocalDate createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public LocalDate getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(LocalDate updatedAt) {
+        this.updatedAt = updatedAt;
     }
 
     public OrderState getOrderState() {

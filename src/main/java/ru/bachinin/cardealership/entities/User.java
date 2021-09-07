@@ -1,5 +1,6 @@
 package ru.bachinin.cardealership.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import ru.bachinin.cardealership.enums.UserRole;
 
 import javax.persistence.Column;
@@ -18,7 +19,7 @@ import java.time.LocalDate;
 import java.util.Set;
 
 @Entity
-@Table(name = "users")
+@Table(name = "users", schema = "public")
 public class User implements Serializable {
     @Id
     @Column(name = "id", nullable = false)
@@ -44,13 +45,18 @@ public class User implements Serializable {
     @Column(name = "created_at", nullable = false)
     private LocalDate createdAt;
 
+    @Column(name = "updated_at")
+    private LocalDate updatedAt;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "user_role", nullable = false)
     private UserRole userRole;
 
+    @JsonIgnore
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "createdBy")
     private Set<Order> orders;
 
+    @JsonIgnore
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "createdBy")
     private Set<Invoice> invoices;
 
@@ -116,6 +122,14 @@ public class User implements Serializable {
 
     public void setCreatedAt(LocalDate createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public LocalDate getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(LocalDate updatedAt) {
+        this.updatedAt = updatedAt;
     }
 
     public Set<Order> getOrders() {
