@@ -2,9 +2,13 @@ package ru.bachinin.cardealership.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import ru.bachinin.cardealership.enums.VehicleStateEnum;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -18,14 +22,15 @@ import javax.persistence.Table;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Set;
 
 @Entity
-@Table(name = "vehicles")
+@Table(name = "vehicles", schema = "public")
 public class Vehicle implements Serializable {
     @Id
     @Column(name = "id")
-    @SequenceGenerator(name = "vehicleSequence", sequenceName = "VEHICLES_GENERATOR", allocationSize = 1)
+    @SequenceGenerator(name = "vehicleSequence", sequenceName = "VEHICLES_SEQUENCE", allocationSize = 1)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "vehicleSequence")
     private Long id;
 
@@ -50,8 +55,9 @@ public class Vehicle implements Serializable {
     @Column(name = "engine_volume")
     private Double engineVolume;
 
-    @Column(name = "is_available")
-    private Boolean isAvailable;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "vehicle_State", nullable = false)
+    private VehicleStateEnum vehicleStateEnum;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "id_vehicle_model", referencedColumnName = "id", nullable = false)
@@ -59,13 +65,13 @@ public class Vehicle implements Serializable {
 
     @JsonIgnore
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "vehicle")
-    private Set<Equipment> equipments;
+    private List<Equipment> equipments;
 
     @JsonIgnore
     @OneToOne(fetch = FetchType.EAGER, mappedBy = "vehicle")
     private Order order;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinColumn(name = "id_invoice", referencedColumnName = "id")
     private Invoice invoice;
 
@@ -133,12 +139,12 @@ public class Vehicle implements Serializable {
         this.engineVolume = engineVolume;
     }
 
-    public Boolean getAvailable() {
-        return isAvailable;
+    public VehicleStateEnum getVehicleStateEnum() {
+        return vehicleStateEnum;
     }
 
-    public void setAvailable(Boolean available) {
-        isAvailable = available;
+    public void setVehicleStateEnum(VehicleStateEnum vehicleStateEnum) {
+        this.vehicleStateEnum = vehicleStateEnum;
     }
 
     public VehicleModel getVehicleModel() {
@@ -149,11 +155,11 @@ public class Vehicle implements Serializable {
         this.vehicleModel = vehicleModel;
     }
 
-    public Set<Equipment> getEquipments() {
+    public List<Equipment> getEquipments() {
         return equipments;
     }
 
-    public void setEquipments(Set<Equipment> equipments) {
+    public void setEquipments(List<Equipment> equipments) {
         this.equipments = equipments;
     }
 

@@ -6,4 +6,5 @@ import ru.bachinin.cardealership.entities.VehicleModel;
 
 @Repository
 public interface VehicleModelRepository extends JpaRepository<VehicleModel, Long> {
+    VehicleModel getVehicleModelByName(String name);
 }

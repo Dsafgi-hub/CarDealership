@@ -2,6 +2,6 @@ package ru.bachinin.cardealership.enums;
 
 import java.io.Serializable;
 
-public enum UserRole implements Serializable {
+public enum UserRoleEnum implements Serializable {
     USER, MANAGER, ADMINISTRATOR
 }

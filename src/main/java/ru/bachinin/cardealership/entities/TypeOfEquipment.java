@@ -15,7 +15,7 @@ import java.io.Serializable;
 import java.util.List;
 
 @Entity
-@Table(name = "type_of_equipment")
+@Table(name = "type_of_equipment", schema = "public")
 public class TypeOfEquipment implements Serializable {
     @Id
     @Column(name = "id")

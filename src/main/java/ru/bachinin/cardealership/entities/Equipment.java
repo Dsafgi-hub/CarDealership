@@ -14,7 +14,7 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 
 @Entity
-@Table(name = "equipments")
+@Table(name = "equipments", schema = "public")
 public class Equipment implements Serializable {
     @Id
     @Column(name = "id")

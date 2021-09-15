@@ -1,8 +1,13 @@
 package ru.bachinin.cardealership.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import ru.bachinin.cardealership.enums.InvoiceStateEnum;
+
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -17,7 +22,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 @Entity
-@Table(name = "invoices")
+@Table(name = "invoices", schema = "public")
 public class Invoice implements Serializable {
     @Id
     @SequenceGenerator(name = "invoiceSequence", sequenceName = "INVOICES_SEQUENCE", allocationSize = 1)
@@ -28,6 +33,9 @@ public class Invoice implements Serializable {
     @Column(name = "created_at", nullable = false)
     private LocalDate createdAt;
 
+    @Column(name = "state", nullable = false)
+    private InvoiceStateEnum invoiceState;
+
     @Column(name = "updated_at")
     private LocalDate updatedAt;
 
@@ -35,7 +43,8 @@ public class Invoice implements Serializable {
     @JoinColumn(name = "id_user", referencedColumnName = "id")
     private User createdBy;
 
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "invoice")
+    @JsonIgnore
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "invoice", cascade = CascadeType.ALL)
     private List<Vehicle> vehicles;
 
     public Long getId() {
@@ -52,6 +61,14 @@ public class Invoice implements Serializable {
 
     public void setCreatedAt(LocalDate createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public InvoiceStateEnum getInvoiceState() {
+        return invoiceState;
+    }
+
+    public void setInvoiceState(InvoiceStateEnum invoiceState) {
+        this.invoiceState = invoiceState;
     }
 
     public User getCreatedBy() {

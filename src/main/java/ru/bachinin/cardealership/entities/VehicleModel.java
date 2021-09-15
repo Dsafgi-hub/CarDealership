@@ -15,7 +15,7 @@ import java.io.Serializable;
 import java.util.List;
 
 @Entity
-@Table(name = "vehicle_model")
+@Table(name = "vehicle_model", schema = "public")
 public class VehicleModel implements Serializable {
     @Id
     @Column(name = "id")
@@ -27,7 +27,7 @@ public class VehicleModel implements Serializable {
     private String name;
 
     @JsonIgnore
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "vehicleModel")
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "vehicleModel")
     private List<Vehicle> vehicleList;
 
     public Long getId() {

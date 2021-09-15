@@ -1,6 +1,6 @@
 package ru.bachinin.cardealership.entities;
 
-import ru.bachinin.cardealership.enums.OrderState;
+import ru.bachinin.cardealership.enums.OrderStateEnum;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -17,7 +17,7 @@ import java.io.Serializable;
 import java.time.LocalDate;
 
 @Entity
-@Table(name = "orders")
+@Table(name = "orders", schema = "public")
 public class Order implements Serializable {
     @Id
     @Column(name = "id")
@@ -32,7 +32,7 @@ public class Order implements Serializable {
     private LocalDate updatedAt;
 
     @Column(name = "state", nullable = false)
-    private OrderState orderState;
+    private OrderStateEnum orderState;
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "id_vehicle", referencedColumnName = "id")
@@ -66,11 +66,11 @@ public class Order implements Serializable {
         this.updatedAt = updatedAt;
     }
 
-    public OrderState getOrderState() {
+    public OrderStateEnum getOrderState() {
         return orderState;
     }
 
-    public void setOrderState(OrderState orderState) {
+    public void setOrderState(OrderStateEnum orderState) {
         this.orderState = orderState;
     }
 

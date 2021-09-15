@@ -1,7 +1,7 @@
 package ru.bachinin.cardealership.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import ru.bachinin.cardealership.enums.UserRole;
+import ru.bachinin.cardealership.enums.UserRoleEnum;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -16,7 +16,7 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import java.io.Serializable;
 import java.time.LocalDate;
-import java.util.Set;
+import java.util.List;
 
 @Entity
 @Table(name = "users", schema = "public")
@@ -50,15 +50,15 @@ public class User implements Serializable {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "user_role", nullable = false)
-    private UserRole userRole;
+    private UserRoleEnum userRole;
 
     @JsonIgnore
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "createdBy")
-    private Set<Order> orders;
+    private List<Order> orders;
 
     @JsonIgnore
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "createdBy")
-    private Set<Invoice> invoices;
+    private List<Invoice> invoices;
 
     public long getId() {
         return id;
@@ -108,11 +108,11 @@ public class User implements Serializable {
         this.secondName = secondName;
     }
 
-    public UserRole getUserRole() {
+    public UserRoleEnum getUserRole() {
         return userRole;
     }
 
-    public void setUserRole(UserRole userRole) {
+    public void setUserRole(UserRoleEnum userRole) {
         this.userRole = userRole;
     }
 
@@ -132,20 +132,19 @@ public class User implements Serializable {
         this.updatedAt = updatedAt;
     }
 
-    public Set<Order> getOrders() {
+    public List<Order> getOrders() {
         return orders;
     }
 
-    public void setOrders(Set<Order> orders) {
+    public void setOrders(List<Order> orders) {
         this.orders = orders;
     }
 
-    public Set<Invoice> getInvoices() {
+    public List<Invoice> getInvoices() {
         return invoices;
     }
 
-    public void setInvoices(Set<Invoice> invoices) {
+    public void setInvoices(List<Invoice> invoices) {
         this.invoices = invoices;
     }
-
 }
