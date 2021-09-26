@@ -5,7 +5,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.security.crypto.bcrypt.BCrypt;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -14,19 +20,26 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import ru.bachinin.cardealership.dto.AuthRequestDto;
+import ru.bachinin.cardealership.dto.RegisterUserDto;
 import ru.bachinin.cardealership.entities.Invoice;
 import ru.bachinin.cardealership.entities.Order;
 import ru.bachinin.cardealership.entities.User;
-import ru.bachinin.cardealership.enums.UserRoleEnum;
 import ru.bachinin.cardealership.exceptions.EntityNotFoundException;
 import ru.bachinin.cardealership.exceptions.NonUniqueValueException;
-import ru.bachinin.cardealership.exceptions.ValueNotFoundException;
+import ru.bachinin.cardealership.jwt.JwtProvider;
 import ru.bachinin.cardealership.repositories.InvoiceRepository;
 import ru.bachinin.cardealership.repositories.OrderRepository;
 import ru.bachinin.cardealership.repositories.UserRepository;
+import ru.bachinin.cardealership.repositories.UserRoleRepository;
+import ru.bachinin.cardealership.service.implementation.UserServiceImpl;
+
+import javax.validation.Valid;
 import java.time.LocalDate;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/users")
@@ -35,6 +48,9 @@ public class UsersController {
     private final UserRepository userRepository;
     private final OrderRepository orderRepository;
     private final InvoiceRepository invoiceRepository;
+    private final AuthenticationManager authenticationManager;
+    private final JwtProvider jwtProvider;
+    private final UserServiceImpl userService;
 
     private final String className = User.class.getName();
     private final String orderClassName = Order.class.getName();
@@ -43,10 +59,16 @@ public class UsersController {
     @Autowired
     public UsersController(UserRepository userRepository,
                            OrderRepository orderRepository,
-                           InvoiceRepository invoiceRepository) {
+                           InvoiceRepository invoiceRepository,
+                           AuthenticationManager authenticationManager,
+                           JwtProvider jwtProvider,
+                           UserServiceImpl userService) {
         this.userRepository = userRepository;
         this.orderRepository = orderRepository;
         this.invoiceRepository = invoiceRepository;
+        this.authenticationManager = authenticationManager;
+        this.jwtProvider = jwtProvider;
+        this.userService = userService;
     }
 
     // Получение списка всех пользователей
@@ -68,9 +90,9 @@ public class UsersController {
     // Получение всех заказов конкретного пользователя
     @GetMapping("/{id}/orders")
     public Page<Order> getAllOrdersByUserId(@PathVariable Long id,
-                                        @RequestParam(defaultValue = "0") Integer pageNo,
-                                        @RequestParam(defaultValue = "10") Integer pageSize,
-                                        @RequestParam(defaultValue = "id") String sortBy) throws EntityNotFoundException {
+                                            @RequestParam(defaultValue = "0") Integer pageNo,
+                                            @RequestParam(defaultValue = "10") Integer pageSize,
+                                            @RequestParam(defaultValue = "id") String sortBy) throws EntityNotFoundException {
         Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(sortBy));
         Page<Order> orderPage = orderRepository.findAllByCreatedBy_Id(id, pageable);
         if (orderPage.hasContent()) {
@@ -98,9 +120,10 @@ public class UsersController {
     // Получение всех накладных конкретного пользователя
     @GetMapping("/{id}/invoices")
     public Page<Invoice> getAllInvoicesByUserId(@PathVariable Long id,
-                                              @RequestParam(defaultValue = "0") Integer pageNo,
-                                              @RequestParam(defaultValue = "10") Integer pageSize,
-                                              @RequestParam(defaultValue = "id") String sortBy) throws EntityNotFoundException {
+                                                @RequestParam(defaultValue = "0") Integer pageNo,
+                                                @RequestParam(defaultValue = "10") Integer pageSize,
+                                                @RequestParam(defaultValue = "id") String sortBy)
+            throws EntityNotFoundException {
         Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(sortBy));
         Page<Invoice> invoicePage = invoiceRepository.findAllByCreatedBy_Id(id, pageable);
         if (invoicePage.hasContent()) {
@@ -110,37 +133,48 @@ public class UsersController {
         }
     }
 
-
-
     @PostMapping(value = "/register")
-    // @ResponseStatus(code = HttpStatus.CREATED)
-    public User addUser(@RequestBody User user)
-            throws NonUniqueValueException, ValueNotFoundException {
-        if (user.getLogin() == null) {
-            throw new ValueNotFoundException("login");
+    @ResponseStatus(code = HttpStatus.CREATED)
+    public User addUser(@Valid @RequestBody RegisterUserDto registerUserDto)
+            throws NonUniqueValueException {
+
+        String login = registerUserDto.getLogin();
+
+        if (userRepository.findByLogin(login) != null) {
+            throw new NonUniqueValueException(login, className);
         }
 
-        if (user.getPassword() == null) {
-            throw new ValueNotFoundException("password");
+        User user = new User();
+        user.setLogin(login);
+        user.setPassword(registerUserDto.getPassword());
+        user.setSurname(registerUserDto.getSurname());
+        user.setFirstName(registerUserDto.getFirstName());
+        user.setSecondName(registerUserDto.getSecondName());
+
+        return userService.register(user);
+    }
+
+    @PostMapping(value = "/auth")
+    public ResponseEntity<?> auth(@RequestBody AuthRequestDto requestDto) {
+        try {
+            String login = requestDto.getLogin();
+            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(login, requestDto.getPassword()));
+            User user = userService.findByLogin(login);
+
+            if (user == null) {
+                throw new UsernameNotFoundException("User with login: " + login + " not found");
+            }
+
+            String token = jwtProvider.generateToken(login);
+
+            Map<Object, Object> response = new HashMap<>();
+            response.put("username", login);
+            response.put("token", token);
+
+            return ResponseEntity.ok(response);
+        } catch (AuthenticationException e) {
+            throw new BadCredentialsException("Invalid username or password");
         }
-
-        if (user.getSurname() == null) {
-            throw new ValueNotFoundException("surname");
-        }
-
-        if (user.getFirstName() == null) {
-            throw new ValueNotFoundException("firstName");
-        }
-
-        if (userRepository.findByLogin(user.getLogin()) != null) {
-            throw new NonUniqueValueException(user.getLogin(), className);
-        }
-
-        user.setCreatedAt(LocalDate.now());
-        user.setPassword(BCrypt.hashpw(user.getPassword(), BCrypt.gensalt()));
-        user.setUserRole(UserRoleEnum.USER);
-
-        return userRepository.save(user);
     }
 
     @PutMapping("/{id}")
@@ -154,7 +188,6 @@ public class UsersController {
             oldUser.setPassword(user.getPassword());
             oldUser.setSecondName(user.getSecondName());
             oldUser.setSurname(user.getSurname());
-            oldUser.setUserRole(user.getUserRole());
             return userRepository.save(oldUser);
         } else {
             throw new EntityNotFoundException(id, className);

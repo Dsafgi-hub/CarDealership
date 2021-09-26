@@ -64,7 +64,7 @@ public class Vehicle implements Serializable {
     private VehicleModel vehicleModel;
 
     @JsonIgnore
-    @OneToMany(fetch = FetchType.EAGER, mappedBy = "vehicle")
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "vehicle")
     private List<Equipment> equipments;
 
     @JsonIgnore

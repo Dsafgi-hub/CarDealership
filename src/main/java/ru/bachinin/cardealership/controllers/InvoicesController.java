@@ -15,11 +15,9 @@ import ru.bachinin.cardealership.entities.User;
 import ru.bachinin.cardealership.entities.Vehicle;
 import ru.bachinin.cardealership.entities.VehicleModel;
 import ru.bachinin.cardealership.enums.InvoiceStateEnum;
-import ru.bachinin.cardealership.enums.UserRoleEnum;
 import ru.bachinin.cardealership.enums.VehicleStateEnum;
 import ru.bachinin.cardealership.exceptions.BadParamException;
 import ru.bachinin.cardealership.exceptions.EntityNotFoundException;
-import ru.bachinin.cardealership.exceptions.ForbiddenException;
 import ru.bachinin.cardealership.exceptions.InvalidStateException;
 import ru.bachinin.cardealership.exceptions.RequestBodyNotProvidedException;
 import ru.bachinin.cardealership.exceptions.ValueNotFoundException;
@@ -28,8 +26,6 @@ import ru.bachinin.cardealership.repositories.UserRepository;
 import ru.bachinin.cardealership.repositories.VehicleModelRepository;
 import ru.bachinin.cardealership.repositories.VehicleRepository;
 import ru.bachinin.cardealership.service.ValidationService;
-
-import java.time.DateTimeException;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.LinkedHashMap;
@@ -151,7 +147,7 @@ public class InvoicesController {
 
     @PutMapping()
     public Invoice updateInvoice(@RequestBody(required = false) Map<String, ?> requestMap)
-            throws EntityNotFoundException, RequestBodyNotProvidedException, ValueNotFoundException, BadParamException, ForbiddenException {
+            throws EntityNotFoundException, RequestBodyNotProvidedException, ValueNotFoundException, BadParamException {
         ValidationService.checkMapNullOrEmpty(requestMap);
 
         String keyIdInvoice = "id_invoice";
@@ -170,11 +166,6 @@ public class InvoicesController {
 
         if (!userRepository.existsById(id_user)) {
             throw new EntityNotFoundException(id_user, userClassName);
-        }
-        User user = userRepository.findUserById(id_user);
-
-        if (user.getUserRole() == UserRoleEnum.USER) {
-            throw new ForbiddenException();
         }
 
         Map<String, ?> updateInvoiceValues;

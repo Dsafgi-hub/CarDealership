@@ -1,16 +1,20 @@
 package ru.bachinin.cardealership.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import ru.bachinin.cardealership.enums.UserRoleEnum;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
+import javax.persistence.EntityListeners;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
@@ -20,6 +24,7 @@ import java.util.List;
 
 @Entity
 @Table(name = "users", schema = "public")
+@EntityListeners(AuditingEntityListener.class)
 public class User implements Serializable {
     @Id
     @Column(name = "id", nullable = false)
@@ -43,14 +48,18 @@ public class User implements Serializable {
     private String secondName;
 
     @Column(name = "created_at", nullable = false)
+    @CreatedDate
     private LocalDate createdAt;
 
     @Column(name = "updated_at")
+    @LastModifiedDate
     private LocalDate updatedAt;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "user_role", nullable = false)
-    private UserRoleEnum userRole;
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(name = "user_roles",
+            joinColumns = {@JoinColumn(name = "id_user", referencedColumnName = "id")},
+            inverseJoinColumns = {@JoinColumn(name = "id_role", referencedColumnName = "id")})
+    private List<UserRole> roles;
 
     @JsonIgnore
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "createdBy")
@@ -76,12 +85,12 @@ public class User implements Serializable {
         this.login = login;
     }
 
-    public String getPassword() {
-        return password;
-    }
-
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public String getPassword() {
+        return password;
     }
 
     public String getSurname() {
@@ -108,12 +117,13 @@ public class User implements Serializable {
         this.secondName = secondName;
     }
 
-    public UserRoleEnum getUserRole() {
-        return userRole;
+
+    public List<UserRole> getRoles() {
+        return roles;
     }
 
-    public void setUserRole(UserRoleEnum userRole) {
-        this.userRole = userRole;
+    public void setRoles(List<UserRole> roles) {
+        this.roles = roles;
     }
 
     public LocalDate getCreatedAt() {

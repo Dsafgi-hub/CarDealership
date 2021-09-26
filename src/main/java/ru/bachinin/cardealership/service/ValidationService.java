@@ -2,6 +2,7 @@ package ru.bachinin.cardealership.service;
 
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.stereotype.Service;
+import ru.bachinin.cardealership.entities.User;
 import ru.bachinin.cardealership.exceptions.BadParamException;
 import ru.bachinin.cardealership.exceptions.EntityNotFoundException;
 import ru.bachinin.cardealership.exceptions.RequestBodyNotProvidedException;
@@ -24,6 +25,31 @@ public class ValidationService {
         if (requestMap.get(key) == null) {
             throw new ValueNotFoundException(key);
         }
+    }
+
+    public static void checkUserValue(User user, String key)
+            throws ValueNotFoundException {
+        switch (key) {
+            case "login":
+                if (user.getLogin() == null) {
+                    throw new ValueNotFoundException(key);
+                }
+                break;
+            case "password":
+                if (user.getPassword() == null) {
+                    throw new ValueNotFoundException(key);
+                }
+                break;
+            case "surname":
+                if (user.getSurname() == null) {
+                    throw new ValueNotFoundException("surname");
+                }
+                break;
+            default:
+                break;
+        }
+
+
     }
 
     public static void checkExistence(PagingAndSortingRepository<? extends Serializable, Long> repository,

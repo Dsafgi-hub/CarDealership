@@ -52,12 +52,12 @@ public class ApplicationExceptionHandler extends ResponseEntityExceptionHandler 
         return new ResponseEntity<>(makeResponse(e.getMessage()), HttpStatus.FORBIDDEN);
     }
 
-    @ExceptionHandler({TypeMismatchException.class, MethodArgumentTypeMismatchException.class})
-    public ResponseEntity<Response> handleTypeMismatchException(TypeMismatchException e) {
-        Response response = new Response("Type mismatch exception:" + e.getMessage());
-
-        return new ResponseEntity<>(response, HttpStatus.GATEWAY_TIMEOUT);
-    }
+//    @ExceptionHandler({TypeMismatchException.class, MethodArgumentTypeMismatchException.class})
+//    public ResponseEntity<Response> handleTypeMismatchException(TypeMismatchException e) {
+//        Response response = new Response("Type mismatch exception:" + e.getMessage());
+//
+//        return new ResponseEntity<>(response, HttpStatus.GATEWAY_TIMEOUT);
+//    }
 
     private Response makeResponse(String message) {
         String responseMessage = String.format("%s %s", LocalDateTime.now(), message);

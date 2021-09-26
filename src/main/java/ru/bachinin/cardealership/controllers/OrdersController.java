@@ -100,17 +100,9 @@ public class OrdersController {
         return orderRepository.save(order);
     }
 
-    @PostMapping()
-    public Order createOrder(Order order) {
-        order.setCreatedAt(LocalDate.now());
-        order.setOrderState(OrderStateEnum.CREATED);
-        orderRepository.save(order);
-        return order;
-    }
-
     @PutMapping("/cancel")
     public Order cancelOrder(@RequestBody(required = false) Map<String, Long> requestMap)
-            throws EntityNotFoundException, InvalidStateException, RequestBodyNotProvidedException, ValueNotFoundException {
+            throws EntityNotFoundException, InvalidStateException, ValueNotFoundException, BadParamException {
 
         Order order = checkValidOrder(requestMap);
 
@@ -125,7 +117,10 @@ public class OrdersController {
 
     @PostMapping("/accept")
     public Order acceptOrder(@RequestBody Map<String, Long> requestMap)
-            throws RequestBodyNotProvidedException, ValueNotFoundException, EntityNotFoundException, InvalidStateException {
+            throws RequestBodyNotProvidedException, ValueNotFoundException, EntityNotFoundException,
+            InvalidStateException, BadParamException {
+
+        ValidationService.checkMapNullOrEmpty(requestMap);
 
         Order order = checkValidOrder(requestMap);
 
@@ -170,14 +165,12 @@ public class OrdersController {
     // Проверяет входные параметры на корректность
     // Возвращает экземпляр объекта в случае успешной проверки
     private Order checkValidOrder(Map<String, Long> requestMap)
-            throws RequestBodyNotProvidedException, ValueNotFoundException, EntityNotFoundException {
+            throws ValueNotFoundException, EntityNotFoundException, BadParamException {
 
         String keyOrder = "id_order";
 
-        ValidationService.checkMapNullOrEmpty(requestMap);
         ValidationService.checkMapValue(requestMap, keyOrder);
-
-        Long id_order = requestMap.get(keyOrder);
+        Long id_order = ValidationService.parseLong(requestMap, keyOrder);
         ValidationService.checkExistence(orderRepository, id_order, className);
 
         return orderRepository.findOrderById(id_order);

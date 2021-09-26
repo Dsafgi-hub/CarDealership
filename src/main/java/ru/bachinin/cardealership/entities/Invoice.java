@@ -6,8 +6,6 @@ import ru.bachinin.cardealership.enums.InvoiceStateEnum;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -44,7 +42,9 @@ public class Invoice implements Serializable {
     private User createdBy;
 
     @JsonIgnore
-    @OneToMany(fetch = FetchType.EAGER, mappedBy = "invoice", cascade = CascadeType.ALL)
+    @OneToMany(fetch = FetchType.LAZY,
+            mappedBy = "invoice",
+            cascade = CascadeType.ALL)
     private List<Vehicle> vehicles;
 
     public Long getId() {

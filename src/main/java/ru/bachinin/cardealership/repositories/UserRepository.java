@@ -8,5 +8,7 @@ import ru.bachinin.cardealership.entities.User;
 public interface UserRepository extends PagingAndSortingRepository<User, Long> {
     User findByLogin(String login);
 
+    User findUserByLoginAndPassword(String login, String password);
+
     User findUserById(Long id);
 }
