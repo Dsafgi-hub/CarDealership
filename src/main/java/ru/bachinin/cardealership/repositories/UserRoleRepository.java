@@ -5,4 +5,6 @@ import ru.bachinin.cardealership.entities.UserRole;
 
 public interface UserRoleRepository extends JpaRepository<UserRole, Long> {
     UserRole findByName(String name);
+
+    boolean existsByName(String name);
 }

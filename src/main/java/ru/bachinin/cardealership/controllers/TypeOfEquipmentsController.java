@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.bachinin.cardealership.entities.TypeOfEquipment;
 import ru.bachinin.cardealership.exceptions.EntityNotFoundException;
 import ru.bachinin.cardealership.repositories.TypeOfEquipmentRepository;
+
+import javax.annotation.PostConstruct;
 import java.util.List;
 
 @RestController
@@ -24,6 +26,25 @@ public class TypeOfEquipmentsController {
     @Autowired
     public TypeOfEquipmentsController(TypeOfEquipmentRepository typeOfEquipmentRepository) {
         this.typeOfEquipmentRepository = typeOfEquipmentRepository;
+    }
+
+    @PostConstruct
+    public void insertTypes() {
+        if (!typeOfEquipmentRepository.existsByName("сигнализация")) {
+            typeOfEquipmentRepository.save(new TypeOfEquipment("сигнализация"));
+        }
+
+        if (!typeOfEquipmentRepository.existsByName("тонировка всех стёкол")) {
+            typeOfEquipmentRepository.save(new TypeOfEquipment("тонировка всех стёкол"));
+        }
+
+        if (!typeOfEquipmentRepository.existsByName("антикоррозийная обработка")) {
+            typeOfEquipmentRepository.save(new TypeOfEquipment("антикоррозийная обработка"));
+        }
+
+        if (!typeOfEquipmentRepository.existsByName("коврики в салон")) {
+            typeOfEquipmentRepository.save(new TypeOfEquipment("коврики в салон"));
+        }
     }
 
     @GetMapping()
@@ -57,8 +78,8 @@ public class TypeOfEquipmentsController {
         }
     }
 
-    @DeleteMapping("{id}")
-    public void deleteType(@PathVariable Long id) throws EntityNotFoundException {
+    @DeleteMapping()
+    public void deleteType(@RequestBody Long id) throws EntityNotFoundException {
         if (typeOfEquipmentRepository.existsById(id)) {
             typeOfEquipmentRepository.deleteById(id);
         } else {

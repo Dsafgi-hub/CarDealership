@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import ru.bachinin.cardealership.dto.RequestInvoiceDto;
 import ru.bachinin.cardealership.entities.Invoice;
 import ru.bachinin.cardealership.entities.User;
 import ru.bachinin.cardealership.entities.Vehicle;
@@ -74,34 +75,18 @@ public class InvoicesController {
     }
 
     @PostMapping()
-    public Invoice createInvoice(@RequestBody(required = false) Map<String, ?> requestMap)
-            throws EntityNotFoundException, ValueNotFoundException, RequestBodyNotProvidedException, BadParamException {
-        String keyUser = "id_user";
-        String keyVehicles = "vehicles";
-
-        ValidationService.checkMapNullOrEmpty(requestMap);
+    public Invoice createInvoice(@RequestBody() RequestInvoiceDto requestInvoiceDto)
+            throws EntityNotFoundException, ValueNotFoundException {
 
         Invoice invoice = new Invoice();
         invoice.setInvoiceState(InvoiceStateEnum.CREATED);
 
-        ValidationService.checkMapValue(requestMap, keyUser);
-
-        invoice.setCreatedBy(userRepository.findUserById(ValidationService.parseLong(requestMap, keyUser)));
-
-        if (requestMap.get(keyVehicles) == null
-                && !(requestMap.get(keyVehicles) instanceof List)) {
-            throw new ValueNotFoundException(keyVehicles);
-        }
+        invoice.setCreatedBy(userRepository.findUserById(requestInvoiceDto.getId()));
 
         invoice.setVehicles(new LinkedList<>());
         invoice.setCreatedAt(LocalDate.now());
 
-        List<LinkedHashMap<String, String>> requestVehicleList;
-        try {
-            requestVehicleList = (List<LinkedHashMap<String, String>>) requestMap.get("vehicles");
-        } catch (ClassCastException e) {
-            throw new BadParamException(keyVehicles, "List<LinkedHashMap<String, String>>");
-        }
+        List<LinkedHashMap<String, String>> requestVehicleList = requestInvoiceDto.getRequestVehicleList();
 
         String keyColour = "colour";
         String keyVehicleModel = "vehicle_model";

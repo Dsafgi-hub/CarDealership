@@ -29,14 +29,17 @@ public class VehicleService {
     private final VehicleRepository vehicleRepository;
     private final EquipmentRepository equipmentRepository;
     private final TypeOfEquipmentRepository typeOfEquipmentRepository;
+    private final EquipmentService equipmentService;
 
     @Autowired
     public VehicleService(VehicleRepository vehicleRepository,
                           EquipmentRepository equipmentRepository,
-                          TypeOfEquipmentRepository typeOfEquipmentRepository) {
+                          TypeOfEquipmentRepository typeOfEquipmentRepository,
+                          EquipmentService equipmentService) {
         this.vehicleRepository = vehicleRepository;
         this.equipmentRepository = equipmentRepository;
         this.typeOfEquipmentRepository = typeOfEquipmentRepository;
+        this.equipmentService = equipmentService;
     }
 
     @Scheduled(fixedDelay = 300000)
@@ -94,7 +97,7 @@ public class VehicleService {
     private void generateEquipment(Vehicle vehicle) {
         int countEquipments = (int) (1 + Math.random() * 6 );
         for(int i = 0; i < countEquipments; i++) {
-            new EquipmentService(equipmentRepository, typeOfEquipmentRepository).generateEquipment(vehicle);
+            equipmentService.generateEquipment(vehicle);
         }
     }
 }

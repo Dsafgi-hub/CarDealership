@@ -1,6 +1,7 @@
 package ru.bachinin.cardealership.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -16,6 +17,7 @@ import java.util.List;
 
 @Entity
 @Table(name = "vehicle_model", schema = "public")
+@NoArgsConstructor
 public class VehicleModel implements Serializable {
     @Id
     @Column(name = "id")
@@ -29,6 +31,10 @@ public class VehicleModel implements Serializable {
     @JsonIgnore
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "vehicleModel")
     private List<Vehicle> vehicleList;
+
+    public VehicleModel(String name) {
+        this.name = name;
+    }
 
     public Long getId() {
         return id;

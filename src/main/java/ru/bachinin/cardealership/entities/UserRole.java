@@ -1,6 +1,7 @@
 package ru.bachinin.cardealership.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -14,6 +15,7 @@ import java.util.List;
 
 @Entity
 @Table(name = "roles")
+@NoArgsConstructor
 public class UserRole {
     @Id
     @Column(name = "id")
@@ -27,7 +29,8 @@ public class UserRole {
     @ManyToMany(mappedBy = "roles", fetch = FetchType.LAZY)
     private List<User> users;
 
-    public UserRole() {
+    public UserRole(String name) {
+        this.name = name;
     }
 
     public Long getId() {

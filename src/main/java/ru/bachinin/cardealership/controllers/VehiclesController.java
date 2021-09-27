@@ -80,7 +80,6 @@ public class VehiclesController {
         }
     }
 
-
     @PostMapping()
     public Vehicle createVehicle(Vehicle vehicle) {
         vehicle.setCreatedAt(LocalDate.now());
