@@ -81,12 +81,12 @@ public class InvoicesController {
         Invoice invoice = new Invoice();
         invoice.setInvoiceState(InvoiceStateEnum.CREATED);
 
-        invoice.setCreatedBy(userRepository.findUserById(requestInvoiceDto.getId()));
+        invoice.setCreatedBy(userRepository.findUserById(requestInvoiceDto.getId_user()));
 
         invoice.setVehicles(new LinkedList<>());
         invoice.setCreatedAt(LocalDate.now());
 
-        List<LinkedHashMap<String, String>> requestVehicleList = requestInvoiceDto.getRequestVehicleList();
+        List<LinkedHashMap<String, String>> requestVehicleList = requestInvoiceDto.getVehicles();
 
         String keyColour = "colour";
         String keyVehicleModel = "vehicle_model";

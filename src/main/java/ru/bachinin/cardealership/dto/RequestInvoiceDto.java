@@ -10,8 +10,8 @@ import java.util.List;
 @Data
 public class RequestInvoiceDto {
     @NotNull
-    private Long id;
+    private Long id_user;
 
     @NotEmpty
-    private List<LinkedHashMap<String, String>> requestVehicleList;
+    private List<LinkedHashMap<String, String>> vehicles;
 }

@@ -4,11 +4,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.bachinin.cardealership.aop.LogExecutionTime;
 import ru.bachinin.cardealership.entities.Equipment;
 import ru.bachinin.cardealership.entities.Vehicle;
 import ru.bachinin.cardealership.enums.VehicleStateEnum;
-import ru.bachinin.cardealership.repositories.EquipmentRepository;
-import ru.bachinin.cardealership.repositories.TypeOfEquipmentRepository;
 import ru.bachinin.cardealership.repositories.VehicleRepository;
 
 import java.math.BigDecimal;
@@ -27,22 +26,17 @@ public class VehicleService {
     private static final BigDecimal MAX_VEHICLE_COST = new BigDecimal("5e6");
 
     private final VehicleRepository vehicleRepository;
-    private final EquipmentRepository equipmentRepository;
-    private final TypeOfEquipmentRepository typeOfEquipmentRepository;
     private final EquipmentService equipmentService;
 
     @Autowired
     public VehicleService(VehicleRepository vehicleRepository,
-                          EquipmentRepository equipmentRepository,
-                          TypeOfEquipmentRepository typeOfEquipmentRepository,
                           EquipmentService equipmentService) {
         this.vehicleRepository = vehicleRepository;
-        this.equipmentRepository = equipmentRepository;
-        this.typeOfEquipmentRepository = typeOfEquipmentRepository;
         this.equipmentService = equipmentService;
     }
 
     @Scheduled(fixedDelay = 300000)
+    @LogExecutionTime
     public void manufacturedVehicle() {
         Iterable<Vehicle> vehicleList = vehicleRepository.findAllByVehicleStateEnumEquals(VehicleStateEnum.CREATED);
         for (Vehicle vehicle : vehicleList) {

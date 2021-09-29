@@ -31,23 +31,30 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
+        String roleUser = "USER";
+        String roleManager = "MANAGER";
+        String roleAdministrator = "ADMINISTRATOR";
+
         http
                 .csrf().disable()
                 .httpBasic().disable()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .authorizeRequests()
-                .antMatchers("/users/auth", "/users/register").permitAll()
-                .antMatchers(HttpMethod.DELETE, "/users/**").hasAnyRole("ADMINISTRATOR")
-                .antMatchers(HttpMethod.GET, "/orders").hasAnyRole("ADMINISTRATOR")
-                .antMatchers(HttpMethod.GET, "/orders/**").hasAnyRole("USER", "MANAGER", "ADMINISTRATOR")
-                .antMatchers(HttpMethod.POST, "/orders").hasAnyRole("USER")
-                .antMatchers(HttpMethod.DELETE, "/orders/**").hasAnyRole("USER", "ADMINISTRATOR")
-                .antMatchers(HttpMethod.PUT, "/orders/**").hasAnyRole("MANAGER", "ADMINISTRATOR")
-                .antMatchers(HttpMethod.GET, "/users/*/orders").hasAnyRole("USER")
-                .antMatchers( "/orders/accept").hasAnyRole("MANAGER", "ADMINISTRATOR")
-                .antMatchers(HttpMethod.GET, "/vehicles/**").hasAnyRole("USER", "MANAGER", "ADMINISTRATOR")
-                .antMatchers("/vehicles_models/**").hasAnyRole("MANAGER", "ADMINISTRATOR")
+                .antMatchers("/users/auth", "/users/register", "/vehicles/created").permitAll()
+                .antMatchers(HttpMethod.DELETE, "/users/**").hasAnyRole(roleAdministrator)
+                .antMatchers(HttpMethod.GET, "/orders").hasAnyRole(roleAdministrator)
+                .antMatchers(HttpMethod.GET, "/orders/**").hasAnyRole(roleUser, roleManager, roleAdministrator)
+                .antMatchers(HttpMethod.POST, "/orders").hasAnyRole(roleUser)
+                .antMatchers(HttpMethod.DELETE, "/orders/**").hasAnyRole(roleUser, roleAdministrator)
+                .antMatchers(HttpMethod.PUT, "/orders/**").hasAnyRole(roleManager, roleAdministrator)
+                .antMatchers(HttpMethod.GET, "/users/*/orders").hasAnyRole(roleUser)
+                .antMatchers( "/orders/accept").hasAnyRole(roleManager)
+                .antMatchers(HttpMethod.GET, "/vehicles/processed").hasAnyRole(roleManager)
+                .antMatchers("/vehicles_models**").hasAnyRole(roleManager, roleAdministrator)
+                .antMatchers("/types_of_equipment*").hasAnyRole(roleManager, roleAdministrator)
+                .antMatchers("/vehicle_models*").hasAnyRole(roleManager, roleAdministrator)
+                .antMatchers( "/invoices*").hasAnyRole(roleManager, roleAdministrator)
                 .anyRequest().authenticated()
                 .and()
                 .apply(new JwtConfigurer(jwtProvider));

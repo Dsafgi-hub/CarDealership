@@ -3,6 +3,7 @@ package ru.bachinin.cardealership.service.implementation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.bachinin.cardealership.aop.LogExecutionTime;
 import ru.bachinin.cardealership.entities.Equipment;
 import ru.bachinin.cardealership.entities.TypeOfEquipment;
 import ru.bachinin.cardealership.entities.Vehicle;
@@ -29,6 +30,7 @@ public class EquipmentServiceImpl implements EquipmentService {
         this.typeOfEquipmentRepository = typeOfEquipmentRepository;
     }
 
+    @LogExecutionTime
     public void generateEquipment(Vehicle vehicle) {
         Equipment equipment = new Equipment();
         equipment.setVehicle(vehicle);
