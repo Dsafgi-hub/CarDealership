@@ -3,9 +3,8 @@ package ru.bachinin.cardealership.entities;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.Inheritance;
+import javax.persistence.InheritanceType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
@@ -15,13 +14,9 @@ import java.math.BigDecimal;
 
 @Entity
 @Table(name = "equipments", schema = "public")
-public class Equipment implements Serializable {
-    @Id
-    @Column(name = "id")
-    @SequenceGenerator(name = "equipmentSequence", sequenceName = "EQUIPMENTS_SEQUENCE", allocationSize = 1)
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "equipmentSequence")
-    private Long id;
-
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+@SequenceGenerator(name = "defaultSeq", sequenceName = "EQUIPMENTS_SEQ", allocationSize = 1)
+public class Equipment extends BaseEntity implements Serializable  {
     @Column(name = "name", nullable = false)
     private String name;
 
@@ -35,14 +30,6 @@ public class Equipment implements Serializable {
     @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "id_vehicle", referencedColumnName = "id")
     private Vehicle vehicle;
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
 
     public String getName() {
         return name;

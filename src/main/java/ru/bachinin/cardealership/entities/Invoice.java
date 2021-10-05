@@ -7,9 +7,6 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
@@ -21,13 +18,8 @@ import java.util.List;
 
 @Entity
 @Table(name = "invoices", schema = "public")
-public class Invoice implements Serializable {
-    @Id
-    @SequenceGenerator(name = "invoiceSequence", sequenceName = "INVOICES_SEQUENCE", allocationSize = 1)
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "invoiceSequence")
-    @Column(name = "id")
-    private Long id;
-
+@SequenceGenerator(name = "defaultSeq", sequenceName = "INVOICES_SEQ", allocationSize = 1)
+public class Invoice extends BaseEntity implements Serializable {
     @Column(name = "created_at", nullable = false)
     private LocalDate createdAt;
 
@@ -46,14 +38,6 @@ public class Invoice implements Serializable {
             mappedBy = "invoice",
             cascade = CascadeType.ALL)
     private List<Vehicle> vehicles;
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
 
     public LocalDate getCreatedAt() {
         return createdAt;

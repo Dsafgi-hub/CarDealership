@@ -1,14 +1,9 @@
 package ru.bachinin.cardealership.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.NoArgsConstructor;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
@@ -16,15 +11,9 @@ import java.io.Serializable;
 import java.util.List;
 
 @Entity
-@Table(name = "vehicle_model", schema = "public")
-@NoArgsConstructor
-public class VehicleModel implements Serializable {
-    @Id
-    @Column(name = "id")
-    @SequenceGenerator(name = "vehicleModelSequence", sequenceName = "VEHICLE_MODEL_SEQUENCE", allocationSize = 1)
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "vehicleModelSequence")
-    private Long id;
-
+@Table(name = "vehicle_models", schema = "public")
+@SequenceGenerator(name = "defaultSeq", sequenceName = "VEHICLE_MODELS_SEQ", allocationSize = 1)
+public class VehicleModel extends BaseEntity implements Serializable {
     @Column(name = "name", nullable = false, unique = true)
     private String name;
 
@@ -32,16 +21,11 @@ public class VehicleModel implements Serializable {
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "vehicleModel")
     private List<Vehicle> vehicleList;
 
+    public VehicleModel() {
+    }
+
     public VehicleModel(String name) {
         this.name = name;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
     }
 
     public String getName() {

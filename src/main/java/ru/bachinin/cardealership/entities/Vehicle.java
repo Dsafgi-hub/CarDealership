@@ -1,18 +1,13 @@
 package ru.bachinin.cardealership.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import ru.bachinin.cardealership.enums.VehicleStateEnum;
-
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
@@ -21,30 +16,17 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.util.List;
-import java.util.Set;
 
 @Entity
 @Table(name = "vehicles", schema = "public")
-public class Vehicle implements Serializable {
-    @Id
-    @Column(name = "id")
-    @SequenceGenerator(name = "vehicleSequence", sequenceName = "VEHICLES_SEQUENCE", allocationSize = 1)
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "vehicleSequence")
-    private Long id;
-
+@SequenceGenerator(name = "defaultSeq", sequenceName = "VEHICLES_SEQ", allocationSize = 1)
+public class Vehicle extends UpdatedAndCreatedBaseEntity implements Serializable {
     @Column(name = "VIN", unique = true)
     private String VIN;
 
     @Column(name = "colour", nullable = false)
     private String colour;
-
-    @Column(name = "created_at", nullable = false)
-    private LocalDate createdAt;
-
-    @Column(name = "updated_at")
-    private LocalDate updatedAt;
 
     @Column(name = "vehicle_cost")
     private BigDecimal vehicleCost;
@@ -75,14 +57,6 @@ public class Vehicle implements Serializable {
     @JoinColumn(name = "id_invoice", referencedColumnName = "id")
     private Invoice invoice;
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
     public String getVIN() {
         return VIN;
     }
@@ -97,22 +71,6 @@ public class Vehicle implements Serializable {
 
     public void setColour(String colour) {
         this.colour = colour;
-    }
-
-    public LocalDate getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDate createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public LocalDate getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public void setUpdatedAt(LocalDate updatedAt) {
-        this.updatedAt = updatedAt;
     }
 
     public BigDecimal getVehicleCost() {

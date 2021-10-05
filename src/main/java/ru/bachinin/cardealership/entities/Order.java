@@ -18,7 +18,8 @@ import java.time.LocalDate;
 
 @Entity
 @Table(name = "orders", schema = "public")
-public class Order implements Serializable {
+@SequenceGenerator(name = "defaultSeq", sequenceName = "ORDERS_SEQ", allocationSize = 1)
+public class Order  extends BaseEntity implements Serializable {
     @Id
     @Column(name = "id")
     @SequenceGenerator(name = "orders_sequence", sequenceName = "ORDERS_SEQUENCE", allocationSize = 1)

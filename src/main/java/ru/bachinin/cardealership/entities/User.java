@@ -1,17 +1,12 @@
 package ru.bachinin.cardealership.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
+import lombok.NoArgsConstructor;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
 import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
@@ -19,19 +14,13 @@ import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import java.io.Serializable;
-import java.time.LocalDate;
 import java.util.List;
 
 @Entity
 @Table(name = "users", schema = "public")
 @EntityListeners(AuditingEntityListener.class)
-public class User implements Serializable {
-    @Id
-    @Column(name = "id", nullable = false)
-    @SequenceGenerator(name = "userInfoSequence", sequenceName = "USERS_SEQUENCE", allocationSize = 1)
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "userInfoSequence")
-    private long id;
-
+@SequenceGenerator(name = "defaultSeq", sequenceName = "USERS_SEQ", allocationSize = 1)
+public class User extends UpdatedAndCreatedBaseEntity implements Serializable {
     @Column(name = "login", nullable = false, unique = true)
     private String login;
 
@@ -47,14 +36,6 @@ public class User implements Serializable {
     @Column(name = "second_name")
     private String secondName;
 
-    @Column(name = "created_at", nullable = false)
-    @CreatedDate
-    private LocalDate createdAt;
-
-    @Column(name = "updated_at")
-    @LastModifiedDate
-    private LocalDate updatedAt;
-
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "user_roles",
             joinColumns = {@JoinColumn(name = "id_user", referencedColumnName = "id")},
@@ -69,12 +50,22 @@ public class User implements Serializable {
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "createdBy")
     private List<Invoice> invoices;
 
-    public long getId() {
-        return id;
+    public User() {
     }
 
-    public void setId(long id) {
-        this.id = id;
+    public User(String login, String password, String surname, String firstName, String secondName) {
+        this.login = login;
+        this.password = password;
+        this.surname = surname;
+        this.firstName = firstName;
+        this.secondName = secondName;
+    }
+
+    public User(String login, String password, String surname, String firstName) {
+        this.login = login;
+        this.password = password;
+        this.surname = surname;
+        this.firstName = firstName;
     }
 
     public String getLogin() {
@@ -117,29 +108,12 @@ public class User implements Serializable {
         this.secondName = secondName;
     }
 
-
     public List<UserRole> getRoles() {
         return roles;
     }
 
     public void setRoles(List<UserRole> roles) {
         this.roles = roles;
-    }
-
-    public LocalDate getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDate createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public LocalDate getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public void setUpdatedAt(LocalDate updatedAt) {
-        this.updatedAt = updatedAt;
     }
 
     public List<Order> getOrders() {
