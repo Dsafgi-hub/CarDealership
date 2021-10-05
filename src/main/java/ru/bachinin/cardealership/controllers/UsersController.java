@@ -22,18 +22,18 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import ru.bachinin.cardealership.dto.AuthRequestDto;
-import ru.bachinin.cardealership.dto.RegisterUserDto;
+import ru.bachinin.cardealership.dto.AuthRequestDTO;
+import ru.bachinin.cardealership.dto.RegisterUserDTO;
 import ru.bachinin.cardealership.entities.Invoice;
 import ru.bachinin.cardealership.entities.Order;
 import ru.bachinin.cardealership.entities.User;
 import ru.bachinin.cardealership.exceptions.EntityNotFoundException;
 import ru.bachinin.cardealership.exceptions.NonUniqueValueException;
 import ru.bachinin.cardealership.jwt.JwtProvider;
+import ru.bachinin.cardealership.mappers.RegisterUserDtoMapper;
 import ru.bachinin.cardealership.repositories.InvoiceRepository;
 import ru.bachinin.cardealership.repositories.OrderRepository;
 import ru.bachinin.cardealership.repositories.UserRepository;
-import ru.bachinin.cardealership.repositories.UserRoleRepository;
 import ru.bachinin.cardealership.service.implementation.UserServiceImpl;
 
 import javax.validation.Valid;
@@ -135,7 +135,7 @@ public class UsersController {
 
     @PostMapping(value = "/register")
     @ResponseStatus(code = HttpStatus.CREATED)
-    public User addUser(@Valid @RequestBody RegisterUserDto registerUserDto)
+    public User addUser(@Valid @RequestBody RegisterUserDTO registerUserDto)
             throws NonUniqueValueException {
 
         String login = registerUserDto.getLogin();
@@ -144,18 +144,13 @@ public class UsersController {
             throw new NonUniqueValueException(login, className);
         }
 
-        User user = new User();
-        user.setLogin(login);
-        user.setPassword(registerUserDto.getPassword());
-        user.setSurname(registerUserDto.getSurname());
-        user.setFirstName(registerUserDto.getFirstName());
-        user.setSecondName(registerUserDto.getSecondName());
+        User user = RegisterUserDtoMapper.REGISTER_USER_DTO_MAPPER.registerUserDtoToUser(registerUserDto);
 
         return userService.register(user);
     }
 
     @PostMapping(value = "/auth")
-    public ResponseEntity<?> auth(@RequestBody AuthRequestDto requestDto) {
+    public ResponseEntity<?> auth(@RequestBody AuthRequestDTO requestDto) {
         try {
             String login = requestDto.getLogin();
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(login, requestDto.getPassword()));

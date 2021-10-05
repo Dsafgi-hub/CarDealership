@@ -8,7 +8,7 @@ import javax.persistence.MappedSuperclass;
 import java.time.LocalDate;
 
 @MappedSuperclass
-public class UpdatedAndCreatedBaseEntity extends BaseEntity{
+public abstract class UpdatedAndCreatedBaseEntity extends BaseEntity{
     @Column(name = "created_at", nullable = false)
     @CreatedDate
     private LocalDate createdAt;

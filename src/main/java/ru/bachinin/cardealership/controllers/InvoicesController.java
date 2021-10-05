@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import ru.bachinin.cardealership.dto.RequestInvoiceDto;
+import ru.bachinin.cardealership.dto.RequestInvoiceDTO;
 import ru.bachinin.cardealership.entities.Invoice;
 import ru.bachinin.cardealership.entities.User;
 import ru.bachinin.cardealership.entities.Vehicle;
@@ -75,7 +75,7 @@ public class InvoicesController {
     }
 
     @PostMapping()
-    public Invoice createInvoice(@RequestBody() RequestInvoiceDto requestInvoiceDto)
+    public Invoice createInvoice(@RequestBody() RequestInvoiceDTO requestInvoiceDto)
             throws EntityNotFoundException, ValueNotFoundException {
 
         Invoice invoice = new Invoice();
@@ -105,7 +105,6 @@ public class InvoicesController {
             vehicle.setColour(linkedHashMap.get(keyColour));
             vehicle.setVehicleModel(vehicleModel);
             vehicle.setInvoice(invoice);
-            vehicle.setCreatedAt(LocalDate.now());
             vehicle.setVehicleStateEnum(VehicleStateEnum.CREATED);
             vehicleRepository.save(vehicle);
         }
