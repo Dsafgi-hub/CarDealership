@@ -1,6 +1,10 @@
 package ru.bachinin.cardealership.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -8,45 +12,37 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import ru.bachinin.cardealership.dto.RequestOrderDTO;
+import ru.bachinin.cardealership.dto.UpdateOrderDTO;
 import ru.bachinin.cardealership.entities.Order;
 import ru.bachinin.cardealership.entities.User;
 import ru.bachinin.cardealership.entities.Vehicle;
 import ru.bachinin.cardealership.enums.OrderStateEnum;
 import ru.bachinin.cardealership.enums.VehicleStateEnum;
-import ru.bachinin.cardealership.exceptions.BadParamException;
 import ru.bachinin.cardealership.exceptions.EntityNotFoundException;
 import ru.bachinin.cardealership.exceptions.InvalidStateException;
-import ru.bachinin.cardealership.exceptions.RequestBodyNotProvidedException;
-import ru.bachinin.cardealership.exceptions.ValueNotFoundException;
 import ru.bachinin.cardealership.repositories.OrderRepository;
-import ru.bachinin.cardealership.repositories.UserRepository;
-import ru.bachinin.cardealership.repositories.VehicleRepository;
-import ru.bachinin.cardealership.service.ValidationService;
+import ru.bachinin.cardealership.service.UserService;
+import ru.bachinin.cardealership.service.VehicleService;
 
-import java.time.LocalDate;
-import java.util.Map;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/orders")
 public class OrdersController {
 
     private final OrderRepository orderRepository;
-    private final UserRepository userRepository;
-    private final VehicleRepository vehicleRepository;
-
-    private final String className = Order.class.getName();
-    private final String userClassName = User.class.getName();
-    private final String vehicleClassName = Vehicle.class.getName();
+    private final UserService userService;
+    private final VehicleService vehicleService;
 
     @Autowired
     public OrdersController(OrderRepository orderRepository,
-                            UserRepository userRepository,
-                            VehicleRepository vehicleRepository) {
+                            UserService userService,
+                            VehicleService vehicleService) {
         this.orderRepository = orderRepository;
-        this.userRepository = userRepository;
-        this.vehicleRepository = vehicleRepository;
+        this.userService = userService;
+        this.vehicleService = vehicleService;
     }
 
     // Получение списка всех заказов
@@ -57,54 +53,68 @@ public class OrdersController {
 
     // Получение конкретного заказа по id
     @GetMapping("/{id}")
-    public Order getOrder(@PathVariable Long id) throws EntityNotFoundException {
-        if (orderRepository.existsById(id)) {
-            return orderRepository.findOrderById(id);
+    public Order getOrder(@PathVariable Long id)
+            throws EntityNotFoundException {
+        return findById(id);
+    }
+
+    // Получение всех заказов конкретного пользователя
+    @GetMapping("/users/{id_user}")
+    public Page<Order> getAllOrdersByUserId(@PathVariable Long id_user,
+                                            @RequestParam(defaultValue = "0") Integer pageNo,
+                                            @RequestParam(defaultValue = "10") Integer pageSize,
+                                            @RequestParam(defaultValue = "id") String sortBy)
+            throws EntityNotFoundException {
+        Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(sortBy));
+        Page<Order> orderPage = orderRepository.findAllByCreatedBy_Id(id_user, pageable);
+        if (orderPage.hasContent()) {
+            return orderPage;
         } else {
-            throw new EntityNotFoundException(id, className);
+            throw new EntityNotFoundException(id_user, User.class.getSimpleName());
+        }
+    }
+
+    // Получение конкретного заказа пользователя
+    @GetMapping("{id_order}/users/{id_user}")
+    public Order getOrderByIdAndUserId(@PathVariable Long id_user,
+                                       @PathVariable Long id_order)
+            throws EntityNotFoundException {
+
+        userService.existsById(id_user);
+
+        if (orderRepository.existsById(id_order)) {
+            return orderRepository.findOrderByIdAndCreatedBy_Id(id_order, id_user);
+        } else {
+            throw new EntityNotFoundException(id_order, Order.class.getSimpleName());
         }
     }
 
     @PostMapping("/create")
-    public Order createOrder(@RequestBody(required = false) Map<String, Object> requestMap)
-            throws RequestBodyNotProvidedException, ValueNotFoundException, BadParamException, EntityNotFoundException,
-            InvalidStateException {
-        ValidationService.checkMapNullOrEmpty(requestMap);
-
-        String keyUser = "id_user";
-        String keyVehicle = "id_vehicle";
-
-        ValidationService.checkMapValue(requestMap, keyUser);
-        ValidationService.checkMapValue(requestMap, keyVehicle);
+    public Order createOrder(@RequestBody RequestOrderDTO requestOrderDTO)
+            throws EntityNotFoundException, InvalidStateException {
 
         Order order = new Order();
 
-        Long user_id = ValidationService.parseLong(requestMap, keyUser);
-        ValidationService.checkExistence(userRepository, user_id, userClassName);
-        User user = userRepository.findUserById(user_id);
-
+        User user = userService.findById(requestOrderDTO.getId_user());
         order.setCreatedBy(user);
 
-        Long id_vehicle = ValidationService.parseLong(requestMap, keyVehicle);
-        ValidationService.checkExistence(vehicleRepository, id_vehicle, vehicleClassName);
-        Vehicle vehicle = vehicleRepository.getVehicleById(id_vehicle);
+        Vehicle vehicle = vehicleService.findById(requestOrderDTO.getId_vehicle());
 
         if (vehicle.getVehicleStateEnum() != VehicleStateEnum.PROCESSED) {
             throw new InvalidStateException("vehicle");
         }
 
         order.setVehicle(vehicle);
-        order.setCreatedAt(LocalDate.now());
         order.setOrderState(OrderStateEnum.CREATED);
 
         return orderRepository.save(order);
     }
 
-    @PutMapping("/cancel")
-    public Order cancelOrder(@RequestBody(required = false) Map<String, Long> requestMap)
-            throws EntityNotFoundException, InvalidStateException, ValueNotFoundException, BadParamException {
+    @PostMapping("/cancel")
+    public Order cancelOrder(@RequestBody Long id)
+            throws InvalidStateException, EntityNotFoundException {
 
-        Order order = checkValidOrder(requestMap);
+        Order order = findById(id);
 
         if (order.getOrderState() != OrderStateEnum.CANCELED) {
             order.setOrderState(OrderStateEnum.CANCELED);
@@ -116,13 +126,10 @@ public class OrdersController {
     }
 
     @PostMapping("/accept")
-    public Order acceptOrder(@RequestBody Map<String, Long> requestMap)
-            throws RequestBodyNotProvidedException, ValueNotFoundException, EntityNotFoundException,
-            InvalidStateException, BadParamException {
+    public Order acceptOrder(@RequestBody Long id)
+            throws EntityNotFoundException, InvalidStateException {
 
-        ValidationService.checkMapNullOrEmpty(requestMap);
-
-        Order order = checkValidOrder(requestMap);
+        Order order = findById(id);
 
         if (order.getOrderState() == OrderStateEnum.CREATED) {
             order.setOrderState(OrderStateEnum.ACCEPTED);
@@ -133,46 +140,36 @@ public class OrdersController {
         return orderRepository.save(order);
     }
 
-    @PutMapping("/{id}")
-    public Order updateOrder(@PathVariable Long id,
-                             @RequestBody Order order) throws EntityNotFoundException {
-        if (orderRepository.existsById(id)) {
-            Optional<Order> optionalOrder = orderRepository.findById(id);
-            if (optionalOrder.isPresent()) {
-                Order oldOrder = optionalOrder.get();
-                oldOrder.setUpdatedAt(LocalDate.now());
-                oldOrder.setOrderState(order.getOrderState());
-                oldOrder.setVehicle(order.getVehicle());
-                oldOrder.setCreatedBy(order.getCreatedBy());
-                return orderRepository.save(oldOrder);
-            } else {
-                throw new EntityNotFoundException(id, className);
-            }
+    @PutMapping()
+    public Order updateOrder(@RequestBody UpdateOrderDTO updateOrderDTO)
+            throws EntityNotFoundException {
+        if (orderRepository.existsById(updateOrderDTO.getId())) {
+            Order oldOrder = findById(updateOrderDTO.getId());
+            oldOrder.setOrderState(OrderStateEnum.valueOf(updateOrderDTO.getUpdateOrder().getOrderState()));
+            oldOrder.setVehicle(vehicleService.findById(updateOrderDTO.getUpdateOrder().getVehicle()));
+            oldOrder.setCreatedBy(userService.findById(updateOrderDTO.getUpdateOrder().getCreatedBy()));
+            return orderRepository.save(oldOrder);
         } else {
-            throw new EntityNotFoundException(id, className);
+            throw new EntityNotFoundException(updateOrderDTO.getId(), Order.class.getSimpleName());
         }
     }
 
     @DeleteMapping("/{id}")
-    public void deleteOrder(@PathVariable Long id) throws EntityNotFoundException {
+    public void deleteOrder(@PathVariable Long id)
+            throws EntityNotFoundException {
         if (orderRepository.existsById(id)) {
             orderRepository.deleteById(id);
         } else {
-            throw new EntityNotFoundException(id, className);
+            throw new EntityNotFoundException(id, Order.class.getSimpleName());
         }
     }
 
-    // Проверяет входные параметры на корректность
-    // Возвращает экземпляр объекта в случае успешной проверки
-    private Order checkValidOrder(Map<String, Long> requestMap)
-            throws ValueNotFoundException, EntityNotFoundException, BadParamException {
-
-        String keyOrder = "id_order";
-
-        ValidationService.checkMapValue(requestMap, keyOrder);
-        Long id_order = ValidationService.parseLong(requestMap, keyOrder);
-        ValidationService.checkExistence(orderRepository, id_order, className);
-
-        return orderRepository.findOrderById(id_order);
+    private Order findById(Long id)
+            throws EntityNotFoundException {
+        if (orderRepository.existsById(id)) {
+            return orderRepository.findOrderById(id);
+        } else {
+            throw new EntityNotFoundException(id, Order.class.getSimpleName());
+        }
     }
 }

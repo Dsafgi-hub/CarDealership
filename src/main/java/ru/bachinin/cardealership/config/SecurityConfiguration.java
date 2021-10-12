@@ -55,6 +55,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .antMatchers("/types_of_equipment*").hasAnyRole(roleManager, roleAdministrator)
                 .antMatchers("/vehicle_models*").hasAnyRole(roleManager, roleAdministrator)
                 .antMatchers( "/invoices*").hasAnyRole(roleManager, roleAdministrator)
+                .antMatchers("/user_roles*").hasAnyRole(roleAdministrator)
                 .anyRequest().authenticated()
                 .and()
                 .apply(new JwtConfigurer(jwtProvider));

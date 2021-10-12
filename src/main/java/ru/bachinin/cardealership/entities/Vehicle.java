@@ -1,10 +1,12 @@
 package ru.bachinin.cardealership.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import ru.bachinin.cardealership.enums.VehicleStateEnum;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EntityListeners;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
@@ -14,13 +16,14 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.util.LinkedHashMap;
 import java.util.List;
 
 @Entity
 @Table(name = "vehicles", schema = "public")
+@EntityListeners(AuditingEntityListener.class)
 @SequenceGenerator(name = "defaultSeq", sequenceName = "VEHICLES_SEQ", allocationSize = 1)
 public class Vehicle extends UpdatedAndCreatedBaseEntity implements Serializable {
     @Column(name = "VIN", unique = true)
@@ -138,4 +141,11 @@ public class Vehicle extends UpdatedAndCreatedBaseEntity implements Serializable
         this.invoice = invoice;
     }
 
+    public void updateVehicle(Vehicle vehicle) {
+        this.setVIN(vehicle.getVIN());
+        this.setVehicleCost(vehicle.getVehicleCost());
+        this.setTotalCost(vehicle.getTotalCost());
+        this.setCreatedAt(vehicle.getCreatedAt());
+        this.setEngineVolume(vehicle.getEngineVolume());
+    }
 }

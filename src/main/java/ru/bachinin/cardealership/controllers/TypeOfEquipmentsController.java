@@ -9,11 +9,13 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import ru.bachinin.cardealership.dto.UpdateTypeOfEquipmentDTO;
 import ru.bachinin.cardealership.entities.TypeOfEquipment;
 import ru.bachinin.cardealership.exceptions.EntityNotFoundException;
 import ru.bachinin.cardealership.repositories.TypeOfEquipmentRepository;
 
 import javax.annotation.PostConstruct;
+import javax.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -21,7 +23,6 @@ import java.util.List;
 public class TypeOfEquipmentsController {
 
     private final TypeOfEquipmentRepository typeOfEquipmentRepository;
-    private final String className = "TypeOfEquipment";
 
     @Autowired
     public TypeOfEquipmentsController(TypeOfEquipmentRepository typeOfEquipmentRepository) {
@@ -53,37 +54,39 @@ public class TypeOfEquipmentsController {
     }
 
     @GetMapping("/{id}")
-    public TypeOfEquipment getType(@PathVariable Long id) throws EntityNotFoundException {
+    public TypeOfEquipment getType(@PathVariable Long id)
+            throws EntityNotFoundException {
         if (typeOfEquipmentRepository.existsById(id)) {
             return typeOfEquipmentRepository.getById(id);
         } else {
-            throw new EntityNotFoundException(id, className);
+            throw new EntityNotFoundException(id, TypeOfEquipment.class.getSimpleName());
         }
     }
 
     @PostMapping()
-    public TypeOfEquipment createType(TypeOfEquipment typeOfEquipment) {
+    public TypeOfEquipment createType(@RequestBody @Valid TypeOfEquipment typeOfEquipment) {
         return typeOfEquipmentRepository.save(typeOfEquipment);
     }
 
-    @PutMapping("/{id}")
-    public TypeOfEquipment updateType(@PathVariable Long id,
-                                      @RequestBody TypeOfEquipment typeOfEquipment) throws EntityNotFoundException {
-        if (typeOfEquipmentRepository.existsById(id)) {
-            TypeOfEquipment oldType = typeOfEquipmentRepository.getById(id);
-            oldType.setName(typeOfEquipment.getName());
+    @PutMapping()
+    public TypeOfEquipment updateType(@RequestBody @Valid UpdateTypeOfEquipmentDTO updateTypeOfEquipmentDTO)
+            throws EntityNotFoundException {
+        if (typeOfEquipmentRepository.existsById(updateTypeOfEquipmentDTO.getId())) {
+            TypeOfEquipment oldType = typeOfEquipmentRepository.getById(updateTypeOfEquipmentDTO.getId());
+            oldType.setName(updateTypeOfEquipmentDTO.getTypeOfEquipment().getName());
             return typeOfEquipmentRepository.save(oldType);
         } else {
-            throw new EntityNotFoundException(id, className);
+            throw new EntityNotFoundException(updateTypeOfEquipmentDTO.getId(), TypeOfEquipment.class.getSimpleName());
         }
     }
 
     @DeleteMapping()
-    public void deleteType(@RequestBody Long id) throws EntityNotFoundException {
+    public void deleteType(@RequestBody Long id)
+            throws EntityNotFoundException {
         if (typeOfEquipmentRepository.existsById(id)) {
             typeOfEquipmentRepository.deleteById(id);
         } else {
-            throw new EntityNotFoundException(id, className);
+            throw new EntityNotFoundException(id, TypeOfEquipment.class.getSimpleName());
         }
     }
 }

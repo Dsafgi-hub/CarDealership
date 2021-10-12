@@ -14,6 +14,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.util.List;
 
 @Entity
@@ -130,5 +131,14 @@ public class User extends UpdatedAndCreatedBaseEntity implements Serializable {
 
     public void setInvoices(List<Invoice> invoices) {
         this.invoices = invoices;
+    }
+    
+    public void updateUser(User user) {
+        this.setUpdatedAt(LocalDate.now());
+        this.setFirstName(user.getFirstName());
+        this.setLogin(user.getLogin());
+        this.setPassword(user.getPassword());
+        this.setSecondName(user.getSecondName());
+        this.setSurname(user.getSurname());
     }
 }

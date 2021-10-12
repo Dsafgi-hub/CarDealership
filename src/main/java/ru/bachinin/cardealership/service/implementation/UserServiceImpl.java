@@ -5,10 +5,10 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import ru.bachinin.cardealership.entities.User;
 import ru.bachinin.cardealership.entities.UserRole;
+import ru.bachinin.cardealership.exceptions.EntityNotFoundException;
 import ru.bachinin.cardealership.repositories.UserRepository;
 import ru.bachinin.cardealership.repositories.UserRoleRepository;
 import ru.bachinin.cardealership.service.UserService;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,9 +19,6 @@ public class UserServiceImpl implements UserService {
     private UserRepository userRepository;
     private UserRoleRepository userRoleRepository;
     private BCryptPasswordEncoder passwordEncoder;
-
-
-    public UserServiceImpl() {}
 
     @Autowired
     public void setUserRepository(UserRepository userRepository) {
@@ -50,5 +47,34 @@ public class UserServiceImpl implements UserService {
 
     public User findByLogin(String login) {
         return userRepository.findByLogin(login);
+    }
+
+    public User findById(Long id) throws EntityNotFoundException {
+        if (userRepository.existsById(id)) {
+            return userRepository.findUserById(id);
+        } else {
+            throw new EntityNotFoundException(id, User.class.getSimpleName());
+        }
+    }
+
+    public void existsById(Long id) throws EntityNotFoundException {
+        if (!userRepository.existsById(id)) {
+            throw new EntityNotFoundException(id, User.class.getSimpleName());
+        }
+    }
+
+    public User save(User user) {
+        return userRepository.save(user);
+    }
+
+    public Iterable<User> findAll() {
+        return userRepository.findAll();
+    }
+
+
+    public void deleteById(Long id)
+            throws EntityNotFoundException {
+        existsById(id);
+        userRepository.deleteById(id);
     }
 }

@@ -31,7 +31,8 @@ public class EquipmentServiceImpl implements EquipmentService {
     }
 
     @LogExecutionTime
-    public void generateEquipment(Vehicle vehicle) {
+    public void generateEquipment(Vehicle vehicle)
+            throws InterruptedException {
         Equipment equipment = new Equipment();
         equipment.setVehicle(vehicle);
         equipment.setPrice(generateEquipmentCost());
@@ -51,16 +52,25 @@ public class EquipmentServiceImpl implements EquipmentService {
         return randomBigDecimal.setScale(2, RoundingMode.HALF_UP);
     }
 
-    private void generateEquipmentType(Equipment equipment) {
+    private void generateEquipmentType(Equipment equipment)
+            throws InterruptedException {
         Long countEquipmentType = typeOfEquipmentRepository.countTypeOfEquipments();
+
+        int delay = (int) ( Math.random() * 3 ) * 1_000;
+        Thread.sleep(delay);
+
         Long randomId = (long) (Math.random()*countEquipmentType + 1);
         TypeOfEquipment typeOfEquipment = typeOfEquipmentRepository.getById(randomId);
         equipment.setTypeOfEquipment(typeOfEquipment);
     }
 
-    private void generateEquipmentName(Equipment equipment) {
+    private void generateEquipmentName(Equipment equipment)
+            throws InterruptedException {
         String[] firstWord = {"Новый ", "Лучший ", "Не имеющий аналогов ", "Сделано в Корее. ", "Сделано в России. "};
         String secondWorld = typeOfEquipmentRepository.getById(equipment.getTypeOfEquipment().getId()).getName();
+
+        int delay = (int) ( Math.random() * 3 ) * 1_000;
+        Thread.sleep(delay);
 
         int positionRandomFirstWord = (int) (Math.random() * firstWord.length);
 

@@ -1,37 +1,25 @@
 package ru.bachinin.cardealership.entities;
 
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import ru.bachinin.cardealership.dto.pojos.UpdateOrder;
 import ru.bachinin.cardealership.enums.OrderStateEnum;
-
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.EntityListeners;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import java.io.Serializable;
-import java.time.LocalDate;
+
 
 @Entity
 @Table(name = "orders", schema = "public")
+@EntityListeners(AuditingEntityListener.class)
 @SequenceGenerator(name = "defaultSeq", sequenceName = "ORDERS_SEQ", allocationSize = 1)
-public class Order  extends BaseEntity implements Serializable {
-    @Id
-    @Column(name = "id")
-    @SequenceGenerator(name = "orders_sequence", sequenceName = "ORDERS_SEQUENCE", allocationSize = 1)
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "orders_sequence")
-    private Long id;
-
-    @Column(name = "created_at", nullable = false)
-    private LocalDate createdAt;
-
-    @Column(name = "updated_at")
-    private LocalDate updatedAt;
-
+public class Order  extends UpdatedAndCreatedBaseEntity implements Serializable {
     @Column(name = "state", nullable = false)
     private OrderStateEnum orderState;
 
@@ -42,30 +30,6 @@ public class Order  extends BaseEntity implements Serializable {
     @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "id_user", referencedColumnName = "id")
     private User createdBy;
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public LocalDate getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDate createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public LocalDate getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public void setUpdatedAt(LocalDate updatedAt) {
-        this.updatedAt = updatedAt;
-    }
 
     public OrderStateEnum getOrderState() {
         return orderState;

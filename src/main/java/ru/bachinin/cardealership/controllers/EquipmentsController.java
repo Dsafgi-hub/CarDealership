@@ -9,10 +9,12 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import ru.bachinin.cardealership.dto.UpdateEquipmentDTO;
 import ru.bachinin.cardealership.entities.Equipment;
 import ru.bachinin.cardealership.exceptions.EntityNotFoundException;
 import ru.bachinin.cardealership.repositories.EquipmentRepository;
 
+import javax.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -20,7 +22,6 @@ import java.util.List;
 public class EquipmentsController {
 
     public final EquipmentRepository equipmentRepository;
-    public final String className = Equipment.class.getName();
 
     @Autowired
     public EquipmentsController(EquipmentRepository equipmentRepository) {
@@ -37,27 +38,25 @@ public class EquipmentsController {
         if (equipmentRepository.existsById(id)) {
             return equipmentRepository.getById(id);
         } else {
-            throw new EntityNotFoundException(id, className);
+            throw new EntityNotFoundException(id, Equipment.class.getSimpleName());
         }
     }
 
     @PostMapping()
-    public Equipment createEquipment(Equipment equipment) {
+    public Equipment createEquipment(@RequestBody @Valid Equipment equipment) {
         return equipmentRepository.save(equipment);
     }
 
     @PutMapping("/{id}")
-    public Equipment updateEquipment(@PathVariable Long id,
-                                     @RequestBody Equipment equipment) throws EntityNotFoundException {
+    public Equipment updateEquipment(@RequestBody @Valid UpdateEquipmentDTO updateEquipmentDTO)
+            throws EntityNotFoundException {
+        Long id = updateEquipmentDTO.getId();
         if (equipmentRepository.existsById(id)) {
             Equipment oldEquipment = equipmentRepository.getById(id);
-            oldEquipment.setName(equipment.getName());
-            oldEquipment.setPrice(equipment.getPrice());
-            oldEquipment.setVehicle(equipment.getVehicle());
-            oldEquipment.setTypeOfEquipment(equipment.getTypeOfEquipment());
+            oldEquipment.updateEquipment(updateEquipmentDTO.getEquipment());
             return equipmentRepository.save(oldEquipment);
         } else {
-            throw new EntityNotFoundException(id, className);
+            throw new EntityNotFoundException(id, Equipment.class.getSimpleName());
         }
     }
 
@@ -66,7 +65,7 @@ public class EquipmentsController {
         if (equipmentRepository.existsById(id)) {
             equipmentRepository.deleteById(id);
         } else {
-            throw new EntityNotFoundException(id, className);
+            throw new EntityNotFoundException(id, Equipment.class.getSimpleName());
         }
     }
 }

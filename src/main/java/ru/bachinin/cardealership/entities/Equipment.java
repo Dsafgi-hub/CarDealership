@@ -62,4 +62,11 @@ public class Equipment extends BaseEntity implements Serializable  {
     public void setTypeOfEquipment(TypeOfEquipment typeOfEquipment) {
         this.typeOfEquipment = typeOfEquipment;
     }
+
+    public void updateEquipment(Equipment newEquipment) {
+        this.setName(newEquipment.getName());
+        this.setPrice(newEquipment.getPrice());
+        this.setVehicle(newEquipment.getVehicle());
+        this.setTypeOfEquipment(newEquipment.getTypeOfEquipment());
+    }
 }

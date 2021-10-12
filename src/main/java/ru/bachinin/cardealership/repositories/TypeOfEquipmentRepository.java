@@ -9,7 +9,7 @@ import java.util.List;
 
 @Repository
 public interface TypeOfEquipmentRepository extends JpaRepository<TypeOfEquipment, Long> {
-    @Query(value = "select count(*) from type_of_equipment", nativeQuery = true)
+    @Query(value = "select count(*) from types_of_equipment", nativeQuery = true)
     Long countTypeOfEquipments();
 
     boolean existsByName(String name);

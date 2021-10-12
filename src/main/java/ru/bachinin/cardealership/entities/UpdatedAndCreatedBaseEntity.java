@@ -9,7 +9,7 @@ import java.time.LocalDate;
 
 @MappedSuperclass
 public abstract class UpdatedAndCreatedBaseEntity extends BaseEntity{
-    @Column(name = "created_at", nullable = false)
+    @Column(name = "created_at")
     @CreatedDate
     private LocalDate createdAt;
 
