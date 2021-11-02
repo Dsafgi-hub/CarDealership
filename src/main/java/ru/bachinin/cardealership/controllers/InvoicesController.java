@@ -1,5 +1,9 @@
 package ru.bachinin.cardealership.controllers;
 
+import org.apache.log4j.BasicConfigurator;
+import org.apache.log4j.Logger;
+import org.springframework.amqp.core.AmqpTemplate;
+import org.springframework.amqp.rabbit.annotation.EnableRabbit;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -35,22 +39,29 @@ import java.util.LinkedList;
 
 @RestController
 @RequestMapping("/invoices")
+@EnableRabbit
 public class InvoicesController {
 
     private final InvoiceRepository invoiceRepository;
     private final UserService userService;
     private final VehicleModelRepository vehicleModelRepository;
     private final VehicleRepository vehicleRepository;
+    private final AmqpTemplate template;
+
+    static Logger logger = Logger.getLogger(InvoicesController.class);
+    String queueName = "vehicleQueue";
 
     @Autowired
     public InvoicesController(InvoiceRepository invoiceRepository,
                               UserService userService,
                               VehicleModelRepository vehicleModelRepository,
-                              VehicleRepository vehicleRepository) {
+                              VehicleRepository vehicleRepository,
+                              AmqpTemplate template) {
         this.invoiceRepository = invoiceRepository;
         this.userService = userService;
         this.vehicleModelRepository = vehicleModelRepository;
         this.vehicleRepository = vehicleRepository;
+        this.template = template;
     }
 
     // Получение списка всех накладных
@@ -89,6 +100,7 @@ public class InvoicesController {
     public Invoice createInvoice(@RequestBody @Valid RequestInvoiceDTO requestInvoiceDto)
             throws EntityNotFoundException {
 
+        BasicConfigurator.configure();
         Invoice invoice = new Invoice();
         invoice.setInvoiceState(InvoiceStateEnum.CREATED);
 
@@ -108,6 +120,10 @@ public class InvoicesController {
             vehicle.setVehicleModel(vehicleModel);
             vehicle.setInvoice(invoice);
             vehicle.setVehicleStateEnum(VehicleStateEnum.CREATED);
+
+            logger.info("Emit to ".concat(queueName));
+            template.convertAndSend(queueName,"Message to queue");
+
             vehicleRepository.save(vehicle);
         }
         return invoiceRepository.save(invoice);
