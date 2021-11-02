@@ -101,6 +101,7 @@ public class InvoicesController {
             throws EntityNotFoundException {
 
         BasicConfigurator.configure();
+
         Invoice invoice = new Invoice();
         invoice.setInvoiceState(InvoiceStateEnum.CREATED);
 
@@ -120,11 +121,11 @@ public class InvoicesController {
             vehicle.setVehicleModel(vehicleModel);
             vehicle.setInvoice(invoice);
             vehicle.setVehicleStateEnum(VehicleStateEnum.CREATED);
-
-            logger.info("Emit to ".concat(queueName));
-            template.convertAndSend(queueName,"Message to queue");
-
             vehicleRepository.save(vehicle);
+
+
+            logger.info("Emit to ".concat(queueName).concat("vehicle: ").concat(vehicle.getId().toString()));
+            template.convertAndSend(queueName, vehicle.getId());
         }
         return invoiceRepository.save(invoice);
     }

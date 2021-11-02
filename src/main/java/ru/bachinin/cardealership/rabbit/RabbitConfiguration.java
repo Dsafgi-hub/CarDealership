@@ -44,7 +44,7 @@ public class RabbitConfiguration {
         container.setConnectionFactory(connectionFactory);
         container.setQueueNames(queueName);
         container.setMessageListener(
-                message -> logger.info("received from vehicleQueue: ".concat(new String(message.getBody()))));
+                message -> logger.info("Received from vehicleQueue: ".concat(message.getBody().toString())));
         return container;
     }
 
