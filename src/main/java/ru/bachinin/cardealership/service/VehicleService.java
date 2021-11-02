@@ -1,5 +1,9 @@
 package ru.bachinin.cardealership.service;
 
+import org.apache.log4j.BasicConfigurator;
+import org.apache.log4j.Logger;
+import org.springframework.amqp.rabbit.annotation.EnableRabbit;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -19,6 +23,7 @@ import java.util.stream.Collectors;
 
 @Service
 @Transactional
+@EnableRabbit
 public class VehicleService {
 
     private static final int VIN_LENGTH = 16;
@@ -27,6 +32,8 @@ public class VehicleService {
 
     private final VehicleRepository vehicleRepository;
     private final EquipmentService equipmentService;
+
+    Logger logger = Logger.getLogger(VehicleService.class);
 
     @Autowired
     public VehicleService(VehicleRepository vehicleRepository,
@@ -42,6 +49,12 @@ public class VehicleService {
         } else {
             throw new EntityNotFoundException(id, Vehicle.class.getSimpleName());
         }
+    }
+
+    @RabbitListener(queues = "vehicleQueue")
+    void manufacturedVehicle(Long idVehicle) {
+        BasicConfigurator.configure();
+        logger.info("Vehicle with id ".concat(idVehicle.toString()).concat(" gets"));
     }
 
     @Scheduled(fixedDelay = 3000000)

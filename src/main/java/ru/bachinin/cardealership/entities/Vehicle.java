@@ -148,4 +148,19 @@ public class Vehicle extends UpdatedAndCreatedBaseEntity implements Serializable
         this.setCreatedAt(vehicle.getCreatedAt());
         this.setEngineVolume(vehicle.getEngineVolume());
     }
+
+    @Override
+    public String toString() {
+        return "Vehicle{" +
+                "VIN='" + VIN + '\'' +
+                ", colour='" + colour + '\'' +
+                ", vehicleCost=" + vehicleCost +
+                ", totalCost=" + totalCost +
+                ", engineVolume=" + engineVolume +
+                ", vehicleStateEnum=" + vehicleStateEnum.name() +
+                ", vehicleModel=" + vehicleModel.getName() +
+                ", order=" + order.getId().toString() +
+                ", invoice=" + invoice.getId().toString() +
+                '}';
+    }
 }
