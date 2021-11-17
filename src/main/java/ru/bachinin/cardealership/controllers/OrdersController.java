@@ -5,6 +5,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -14,8 +18,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.RestTemplate;
 import ru.bachinin.cardealership.dto.RequestOrderDTO;
 import ru.bachinin.cardealership.dto.UpdateOrderDTO;
+import ru.bachinin.cardealership.dto.UserRatingDTO;
 import ru.bachinin.cardealership.entities.Order;
 import ru.bachinin.cardealership.entities.User;
 import ru.bachinin.cardealership.entities.Vehicle;
@@ -23,10 +29,11 @@ import ru.bachinin.cardealership.enums.OrderStateEnum;
 import ru.bachinin.cardealership.enums.VehicleStateEnum;
 import ru.bachinin.cardealership.exceptions.EntityNotFoundException;
 import ru.bachinin.cardealership.exceptions.InvalidStateException;
+import ru.bachinin.cardealership.exceptions.LowCreditRatingException;
+import ru.bachinin.cardealership.mappers.UserRatingDtoMapper;
 import ru.bachinin.cardealership.repositories.OrderRepository;
 import ru.bachinin.cardealership.service.UserService;
 import ru.bachinin.cardealership.service.VehicleService;
-
 
 @RestController
 @RequestMapping("/orders")
@@ -35,14 +42,17 @@ public class OrdersController {
     private final OrderRepository orderRepository;
     private final UserService userService;
     private final VehicleService vehicleService;
+    private final UserRatingDtoMapper userRatingDtoMapper;
 
     @Autowired
     public OrdersController(OrderRepository orderRepository,
                             UserService userService,
-                            VehicleService vehicleService) {
+                            VehicleService vehicleService,
+                            UserRatingDtoMapper userRatingDtoMapper) {
         this.orderRepository = orderRepository;
         this.userService = userService;
         this.vehicleService = vehicleService;
+        this.userRatingDtoMapper = userRatingDtoMapper;
     }
 
     // Получение списка всех заказов
@@ -103,11 +113,36 @@ public class OrdersController {
         if (vehicle.getVehicleStateEnum() != VehicleStateEnum.PROCESSED) {
             throw new InvalidStateException("vehicle");
         }
-
         order.setVehicle(vehicle);
-        order.setOrderState(OrderStateEnum.CREATED);
 
+        if (requestOrderDTO.getAgreement()) {
+            Integer creditRating = getUserCreditRating(user);
+            if (creditRating != null
+                    && creditRating < 0) {
+                throw new LowCreditRatingException("Your credit rating is low");
+            }
+        }
+        vehicle.setVehicleStateEnum(VehicleStateEnum.DONE);
+        vehicleService.save(vehicle);
+
+        order.setOrderState(OrderStateEnum.CREATED);
         return orderRepository.save(order);
+    }
+
+    private Integer getUserCreditRating(User user) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_XML);
+
+        final String uri = "http://localhost:8199/clients";
+        HttpEntity<UserRatingDTO> request = new HttpEntity<>(userRatingDtoMapper.userToUserRatingDto(user), headers);
+        ResponseEntity<Integer> responseEntity = new RestTemplate().postForEntity(uri, request, Integer.class);
+
+        if (responseEntity.getStatusCode().is2xxSuccessful()
+                && responseEntity.hasBody()) {
+            return responseEntity.getBody();
+        }
+
+        return null;
     }
 
     @PostMapping("/cancel")
@@ -121,6 +156,9 @@ public class OrdersController {
         } else {
             throw new InvalidStateException("order");
         }
+        Vehicle vehicle = order.getVehicle();
+        vehicle.setVehicleStateEnum(VehicleStateEnum.PROCESSED);
+        vehicleService.save(vehicle);
 
         return orderRepository.save(order);
     }

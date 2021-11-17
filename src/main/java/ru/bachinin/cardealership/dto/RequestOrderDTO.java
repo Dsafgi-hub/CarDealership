@@ -9,6 +9,11 @@ public class RequestOrderDTO {
     @NotNull
     private Long id_vehicle;
 
+    @NotNull
+    private Boolean agreement;
+
+    private Integer period;
+
     public Long getId_user() {
         return id_user;
     }
@@ -23,5 +28,21 @@ public class RequestOrderDTO {
 
     public void setId_vehicle(Long id_vehicle) {
         this.id_vehicle = id_vehicle;
+    }
+
+    public Boolean getAgreement() {
+        return agreement;
+    }
+
+    public void setAgreement(Boolean agreement) {
+        this.agreement = agreement;
+    }
+
+    public Integer getPeriod() {
+        return period;
+    }
+
+    public void setPeriod(Integer period) {
+        this.period = period;
     }
 }
