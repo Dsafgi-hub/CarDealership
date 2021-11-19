@@ -29,11 +29,8 @@ public class VehicleService {
     private static final int VIN_LENGTH = 16;
     private static final BigDecimal MIN_VEHICLE_COST = new BigDecimal("5e3");
     private static final BigDecimal MAX_VEHICLE_COST = new BigDecimal("5e6");
-
     private final VehicleRepository vehicleRepository;
     private final EquipmentService equipmentService;
-
-    Logger logger = Logger.getLogger(VehicleService.class);
 
     @Autowired
     public VehicleService(VehicleRepository vehicleRepository,
@@ -51,13 +48,11 @@ public class VehicleService {
         }
     }
 
-    @RabbitListener(queues = "vehicleQueue")
-    void manufacturedVehicle(Long idVehicle) {
-        BasicConfigurator.configure();
-        logger.info("Vehicle with id ".concat(idVehicle.toString()).concat(" gets"));
+    public Vehicle save(Vehicle vehicle) {
+        return vehicleRepository.save(vehicle);
     }
 
-    @Scheduled(fixedDelay = 3000000)
+    @Scheduled(fixedDelayString = "${scheduled.fixed-delay}")
     @LogExecutionTime
     public void manufacturedVehicle()
             throws InterruptedException {

@@ -23,10 +23,12 @@ import ru.bachinin.cardealership.enums.OrderStateEnum;
 import ru.bachinin.cardealership.enums.VehicleStateEnum;
 import ru.bachinin.cardealership.exceptions.EntityNotFoundException;
 import ru.bachinin.cardealership.exceptions.InvalidStateException;
+import ru.bachinin.cardealership.exceptions.LowCreditRatingException;
+import ru.bachinin.cardealership.mappers.UserRatingDtoMapper;
+import ru.bachinin.cardealership.proxies.CreditRatingFeignProxy;
 import ru.bachinin.cardealership.repositories.OrderRepository;
 import ru.bachinin.cardealership.service.UserService;
 import ru.bachinin.cardealership.service.VehicleService;
-
 
 @RestController
 @RequestMapping("/orders")
@@ -35,14 +37,20 @@ public class OrdersController {
     private final OrderRepository orderRepository;
     private final UserService userService;
     private final VehicleService vehicleService;
+    private final UserRatingDtoMapper userRatingDtoMapper;
+    private final CreditRatingFeignProxy creditRatingFeignProxy;
 
     @Autowired
     public OrdersController(OrderRepository orderRepository,
                             UserService userService,
-                            VehicleService vehicleService) {
+                            VehicleService vehicleService,
+                            UserRatingDtoMapper userRatingDtoMapper,
+                            CreditRatingFeignProxy creditRatingFeignProxy) {
         this.orderRepository = orderRepository;
         this.userService = userService;
         this.vehicleService = vehicleService;
+        this.userRatingDtoMapper = userRatingDtoMapper;
+        this.creditRatingFeignProxy = creditRatingFeignProxy;
     }
 
     // Получение списка всех заказов
@@ -103,11 +111,24 @@ public class OrdersController {
         if (vehicle.getVehicleStateEnum() != VehicleStateEnum.PROCESSED) {
             throw new InvalidStateException("vehicle");
         }
-
         order.setVehicle(vehicle);
-        order.setOrderState(OrderStateEnum.CREATED);
 
+        if (requestOrderDTO.getAgreement()) {
+            Integer creditRating = getUserCreditRating(user);
+            if (creditRating != null
+                    && creditRating < 0) {
+                throw new LowCreditRatingException("Your credit rating is low");
+            }
+        }
+        vehicle.setVehicleStateEnum(VehicleStateEnum.DONE);
+        vehicleService.save(vehicle);
+
+        order.setOrderState(OrderStateEnum.CREATED);
         return orderRepository.save(order);
+    }
+
+    private Integer getUserCreditRating(User user) {
+        return creditRatingFeignProxy.calculateRating(userRatingDtoMapper.userToUserRatingDto(user));
     }
 
     @PostMapping("/cancel")
@@ -121,6 +142,9 @@ public class OrdersController {
         } else {
             throw new InvalidStateException("order");
         }
+        Vehicle vehicle = order.getVehicle();
+        vehicle.setVehicleStateEnum(VehicleStateEnum.PROCESSED);
+        vehicleService.save(vehicle);
 
         return orderRepository.save(order);
     }

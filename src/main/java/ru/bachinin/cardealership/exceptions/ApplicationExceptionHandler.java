@@ -26,6 +26,11 @@ public class ApplicationExceptionHandler extends ResponseEntityExceptionHandler 
         return new ResponseEntity<>(makeResponse(e.getMessage()), HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(LowCreditRatingException.class)
+    public ResponseEntity<ResponseDTO> handleLowCreditRatingException(LowCreditRatingException e) {
+        return new ResponseEntity<>(makeResponse(e.getMessage()), HttpStatus.BAD_REQUEST);
+    }
+
     private ResponseDTO makeResponse(String message) {
         String responseMessage = String.format("%s %s", LocalDateTime.now(), message);
         return new ResponseDTO(responseMessage);

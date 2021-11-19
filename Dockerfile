@@ -1,14 +1,5 @@
-# JVM
 FROM adoptopenjdk/openjdk11:alpine-jre
-
-# PORT
-EXPOSE 8099
-
-# Refer to Maven build -> finalName
-ARG JAR_FILE=target/carDealership-0.0.1-SNAPSHOT.jar
-
-# cp target/spring-boot-web.jar /opt/app/app.jar
-COPY ${JAR_FILE} app.jar
-
-# java -jar /opt/app/app.jar
-ENTRYPOINT ["java","-jar","app.jar"]
+EXPOSE 8080
+ARG JAR_FILE=/target/carDealership-0.0.1-SNAPSHOT.jar
+COPY /target/carDealership-0.0.1-SNAPSHOT.jar car-dealership.jar
+ENTRYPOINT ["java","-jar","car-dealership.jar"]

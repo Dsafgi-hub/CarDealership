@@ -1,41 +1,19 @@
 package ru.bachinin.cardealership.dto;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Size;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
 
-public class RegisterUserDTO {
-    @NotBlank
-    @Size(min = 3, max = 50)
-    private String login;
+@XmlRootElement(name = "user")
+public class UserRatingDTO {
 
-    @NotBlank
-    @Size(min = 3, max = 50)
-    private String password;
-
-    @NotBlank
+    @XmlElement
     private String surname;
 
-    @NotBlank
+    @XmlElement
     private String firstName;
 
-    @NotBlank
+    @XmlElement
     private String secondName;
-
-    public String getLogin() {
-        return login;
-    }
-
-    public void setLogin(String login) {
-        this.login = login;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
 
     public String getSurname() {
         return surname;
