@@ -1,6 +1,6 @@
 package ru.bachinin.cardealership.exceptions;
 
-public class EntityNotFoundException extends Exception {
+public class EntityNotFoundException extends RuntimeException {
     public EntityNotFoundException(Long id, String className) {
         super("Entity = " + className + " is not found by id = " + id);
     }

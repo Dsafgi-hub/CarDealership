@@ -31,6 +31,11 @@ public class ApplicationExceptionHandler extends ResponseEntityExceptionHandler 
         return new ResponseEntity<>(makeResponse(e.getMessage()), HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(PeriodNotStatedException.class)
+    public ResponseEntity<ResponseDTO> handlePeriodNotStatedException(PeriodNotStatedException e) {
+        return new ResponseEntity<>(makeResponse(e.getMessage()), HttpStatus.BAD_REQUEST);
+    }
+
     private ResponseDTO makeResponse(String message) {
         String responseMessage = String.format("%s %s", LocalDateTime.now(), message);
         return new ResponseDTO(responseMessage);
